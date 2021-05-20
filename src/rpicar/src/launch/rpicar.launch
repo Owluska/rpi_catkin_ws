@@ -1,0 +1,17 @@
+<launch>
+  	<node pkg="rpicar" type="battery_talker.py" name="battery"/>
+	<node pkg="rpicar" type="IMU_talker.py" name="imu"/> 
+  	<node pkg="rpicar" type="US_talker.py" name="US1">
+  		<param name="US_number" value="1"/>
+  	</node>
+  	<node pkg="rpicar" type="US_talker.py" name="US2">
+  		<param name="US_number" value="2"/>
+  	</node>
+
+  	<node pkg="rpicar" type="camera_talker.py" name="left_camera">
+  		<param name="camera" value="2"/>
+  	</node>
+  	<node pkg="rpicar" type="camera_talker.py" name="right_camera">
+  		<param name="camera" value="0"/>
+  	</node>
+</launch>

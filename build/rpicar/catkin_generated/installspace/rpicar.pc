@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_ws/install
+
+Name: rpicar
+Description: Description of rpicar
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: rospy cv_bridge std_msgs sensor_msgs
