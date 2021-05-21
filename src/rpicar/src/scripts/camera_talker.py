@@ -26,11 +26,12 @@ class usb_cam_talker():
         #print(self.camera)
         self.cap = cv2.VideoCapture(self.camera) 
         self.topic_name = [k for k, v in self.camera_labels.items() if v == camera][0]
-        self.bridge = CvBridge()
+        #self.bridge = CvBridge()
         self.seq = 0
         self.frame_id = rospy.get_param('~frame_id', '/camera_link')
         
         self.cam_raw_msg = Image()
+        self.cam_raw_msg.is_bigendian = 1
         self.cam_info_msg = CameraInfo()
         
         self.pub_cam_raw = rospy.Publisher("{}/image_raw".format(self.topic_name), Image, queue_size = 10)
@@ -48,28 +49,31 @@ class usb_cam_talker():
                 self.cam_raw_msg.header.seq = self.seq
                 self.cam_raw_msg.header.frame_id = self.frame_id
                 
-                image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                width = frame.shape[1]
-                height = frame.shape[0]
-#                 cv2.imshow("gray", image)
-#                 key = cv2.waitKey(1) & 0xFF
-                #self.cam_raw_msg.data = self.bridge.cv2_to_imgmsg(image, "bgr8")
-                #np_array = np.zeros((width*height), np.uint8)
-                image_np = np.asarray(frame, np.uint8).flatten()
-                #print(image_np)
-                self.cam_raw_msg.data = list(image_np)
+                #image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-                #print(self.cam_raw_msg.data)
-                self.cam_raw_msg.height = height
-                self.cam_raw_msg.width = width
+                #cv2.imshow("gray", image)
+                #key = cv2.waitKey(1) & 0xFF
+                #np_array = np.zeros((width*height), np.uint8)
+                #image_np = np.asarray(image, np.uint8)
+                #self.cam_raw_msg.data = image_np.tolist()
+
+                #self.cam_raw_msg.height = height
+                #self.cam_raw_msg.width = width                
+                self.cam_raw_msg = CvBridge().cv2_to_imgmsg(frame, "bgr8")
                 
-                self.pub_cam_raw.publish(self.cam_raw_msg)
+
+                try:
+                    self.pub_cam_raw.publish(self.cam_raw_msg)
+                except Exception as e:
+                    rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
                 
                 #publish camera info
                 self.cam_info_msg.header.stamp = rospy.Time.now()
                 self.cam_info_msg.header.seq = self.seq
                 self.cam_info_msg.header.frame_id = self.frame_id
                 
+                width = frame.shape[1]
+                height = frame.shape[0]
                 self.cam_info_msg.height = height
                 self.cam_info_msg.width = width
                 self.cam_info_msg.K = self.K.flatten()
