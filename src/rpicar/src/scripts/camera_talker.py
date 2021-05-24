@@ -38,16 +38,17 @@ class usb_cam_talker():
         self.pub_cam_info = rospy.Publisher("{}/image_info".format(self.topic_name), CameraInfo, queue_size = 10)
         self.log_info = ""
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
-        self.loop_rate= rospy.Rate(self.fps)    
+        self.loop_rate= rospy.Rate(self.fps)
+        #self.loop_rate= rospy.Rate(1)    
 
     def talker(self):
         ret, frame = self.cap.read()        
         if ret:
             try:
                 #publish camera image
-                self.cam_raw_msg.header.stamp = rospy.Time.now()
-                self.cam_raw_msg.header.seq = self.seq
-                self.cam_raw_msg.header.frame_id = self.frame_id
+                # self.cam_raw_msg.header.stamp = rospy.Time.now()
+                # self.cam_raw_msg.header.seq = self.seq
+                # self.cam_raw_msg.header.frame_id = self.frame_id
                 
                 #image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -60,7 +61,9 @@ class usb_cam_talker():
                 #self.cam_raw_msg.height = height
                 #self.cam_raw_msg.width = width                
                 self.cam_raw_msg = CvBridge().cv2_to_imgmsg(frame, "bgr8")
-                
+                self.cam_raw_msg.header.stamp = rospy.Time.now()
+                self.cam_raw_msg.header.seq = self.seq
+                self.cam_raw_msg.header.frame_id = self.frame_id               
 
                 try:
                     self.pub_cam_raw.publish(self.cam_raw_msg)
@@ -89,13 +92,15 @@ class usb_cam_talker():
                 self.cap.release()
                 cv2.destroyAllWindows()
                 rospy.loginfo("An exception of type {} occured. Arguments:\n{}, camera label:{}".format(type(e).__name__, e.args, self.topic_name))
-                rospy.signal_shutdown("Invalid camera channel")
+                self.cap = cv2.VideoCapture(self.camera) 
+                #rospy.signal_shutdown("Invalid camera channel")
 
         else:
             self.cap.release()
             cv2.destroyAllWindows()
             rospy.loginfo("Failed to connect camera, label:{}".format(self.topic_name))
-            rospy.signal_shutdown("Invalid camera channel")
+            self.cap = cv2.VideoCapture(self.camera) 
+            #rospy.signal_shutdown("Invalid camera channel")
         
     def start(self):
         while not rospy.is_shutdown():

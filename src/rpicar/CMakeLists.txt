@@ -12,7 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   #opencv2
   cv_bridge
   std_msgs
-  sensor_msgs 
+  sensor_msgs
+  message_generation 
 )
 
 ## System dependencies are found with CMake's conventions
@@ -56,11 +57,10 @@ catkin_python_setup()
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  camera.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -70,10 +70,11 @@ catkin_python_setup()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -167,6 +168,7 @@ include_directories(
    src/scripts/US_talker.py
    src/scripts/IMU_talker.py
    src/scripts/camera_talker.py
+   #src/scrtpts/camera_client.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
