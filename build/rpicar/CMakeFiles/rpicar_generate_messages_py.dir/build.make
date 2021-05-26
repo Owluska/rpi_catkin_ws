@@ -59,9 +59,9 @@ rpicar/CMakeFiles/rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/pyth
 
 /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/lib/genpy/gensrv_py.py
 /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /home/pi/catkin_ws/src/rpicar/srv/camera.srv
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/std_msgs/msg/Header.msg
 /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/sensor_msgs/msg/CameraInfo.msg
+/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/std_msgs/msg/Header.msg
+/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python code from SRV rpicar/camera"
 	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/melodic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv
 

@@ -112,3 +112,11 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/rpicar" TYPE PROGRAM FILES "/home/pi/catkin_ws/build/rpicar/catkin_generated/installspace/camera_talker.py")
 endif()
 
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/rpicar" TYPE PROGRAM FILES "/home/pi/catkin_ws/build/rpicar/catkin_generated/installspace/camera_client_service.py")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/rpicar" TYPE PROGRAM FILES "/home/pi/catkin_ws/build/rpicar/catkin_generated/installspace/2cameras_talker.py")
+endif()
+

@@ -109,7 +109,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rpicar
  CATKIN_DEPENDS rospy cv_bridge 
- CATKIN_DEPENDS std_msgs sensor_msgs
+ CATKIN_DEPENDS std_msgs sensor_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -164,11 +164,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
  catkin_install_python(PROGRAMS
-   src/scripts/battery_talker.py
-   src/scripts/US_talker.py
-   src/scripts/IMU_talker.py
-   src/scripts/camera_talker.py
-   #src/scrtpts/camera_client.py
+   src/scripts/battery_talker.py src/scripts/US_talker.py src/scripts/IMU_talker.py src/scripts/camera_talker.py
+   src/scripts/camera_client_service.py src/scripts/2cameras_talker.py 
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 

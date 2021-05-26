@@ -59,9 +59,9 @@ rpicar/CMakeFiles/rpicar_generate_messages_eus: /home/pi/catkin_ws/devel/share/r
 
 /home/pi/catkin_ws/devel/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/lib/geneus/gen_eus.py
 /home/pi/catkin_ws/devel/share/roseus/ros/rpicar/srv/camera.l: /home/pi/catkin_ws/src/rpicar/srv/camera.srv
-/home/pi/catkin_ws/devel/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
-/home/pi/catkin_ws/devel/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/share/std_msgs/msg/Header.msg
 /home/pi/catkin_ws/devel/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/share/sensor_msgs/msg/CameraInfo.msg
+/home/pi/catkin_ws/devel/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/share/std_msgs/msg/Header.msg
+/home/pi/catkin_ws/devel/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating EusLisp code from rpicar/camera.srv"
 	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/melodic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel/share/roseus/ros/rpicar/srv
 

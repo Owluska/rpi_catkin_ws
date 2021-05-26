@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/pi/catkin_ws/build
 include rpicar/CMakeFiles/_rpicar_generate_messages_check_deps_camera.dir/progress.make
 
 rpicar/CMakeFiles/_rpicar_generate_messages_check_deps_camera:
-	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/melodic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py rpicar /home/pi/catkin_ws/src/rpicar/srv/camera.srv sensor_msgs/RegionOfInterest:std_msgs/Header:sensor_msgs/CameraInfo
+	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/melodic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py rpicar /home/pi/catkin_ws/src/rpicar/srv/camera.srv sensor_msgs/CameraInfo:std_msgs/Header:sensor_msgs/RegionOfInterest
 
 _rpicar_generate_messages_check_deps_camera: rpicar/CMakeFiles/_rpicar_generate_messages_check_deps_camera
 _rpicar_generate_messages_check_deps_camera: rpicar/CMakeFiles/_rpicar_generate_messages_check_deps_camera.dir/build.make
