@@ -26,18 +26,19 @@ class usb_cam_talker():
     
     def __init__(self, camera):
         self.camera = camera
+        self.camera_name = "/usb_camera/"
         #print(self.camera)
         self.cap = cv2.VideoCapture(self.camera) 
         #self.bridge = CvBridge()
         self.seq = 0
-        self.frame_id = rospy.get_param('~frame_id', '/camera_link')
+        self.frame_id = rospy.get_param('~frame_id', self.camera_name)
         
         self.cam_raw_msg = Image()
         self.cam_raw_msg.is_bigendian = 1
         self.cam_info_msg = CameraInfo()
         
-        self.pub_cam_raw = rospy.Publisher("camera/image_raw", Image, queue_size = 10)
-        self.pub_cam_info = rospy.Publisher("camera/image_info", CameraInfo, queue_size = 10)
+        self.pub_cam_raw = rospy.Publisher(self.camera_name+"image_raw", Image, queue_size = 10)
+        self.pub_cam_info = rospy.Publisher(self.camera_name+"camera_info", CameraInfo, queue_size = 10)
         self.log_info = ""
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
         self.loop_rate= rospy.Rate(self.fps)
@@ -50,19 +51,17 @@ class usb_cam_talker():
                 self.failure_counter = 0
 
                 self.cam_raw_msg = CvBridge().cv2_to_imgmsg(frame, "bgr8")
-                self.cam_raw_msg.header.stamp = rospy.Time.now()
+                time = rospy.Time.now()
+                self.cam_raw_msg.header.stamp = time
                 self.cam_raw_msg.header.seq = self.seq
                 self.cam_raw_msg.header.frame_id = self.frame_id
                 self.cam_raw_msg.height = self.height
                 self.cam_raw_msg.width = self.width
 
-                try:
-                    self.pub_cam_raw.publish(self.cam_raw_msg)
-                except Exception as e:
-                    rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
+
                 
                 #publish camera info
-                self.cam_info_msg.header.stamp = rospy.Time.now()
+                self.cam_info_msg.header.stamp = time
                 self.cam_info_msg.header.seq = self.seq
                 self.cam_info_msg.header.frame_id = self.frame_id
 
@@ -70,13 +69,18 @@ class usb_cam_talker():
                 self.cam_info_msg.width = self.width
                 self.cam_info_msg.K = list(self.K.flatten())
                 
+                self.cam_info_msg.distortion_model = "plumb_bob"
                 self.cam_info_msg.P = self.projection.flatten()
                 self.cam_info_msg.D = self.distortion
                 self.cam_info_msg.R = self.rectification.flatten()
     
-                #print(self.cam_info_msg.P)
+
+                try:
+                    self.pub_cam_raw.publish(self.cam_raw_msg)
+                    self.pub_cam_info.publish(self.cam_info_msg)
+                except Exception as e:
+                    rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
                 
-                self.pub_cam_info.publish(self.cam_info_msg)
             
             # except Exception as e:
             #     self.cap.release()
