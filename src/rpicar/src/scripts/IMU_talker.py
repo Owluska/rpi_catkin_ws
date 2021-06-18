@@ -213,6 +213,10 @@ class imu_talker():
         self.imu_msg = Imu()
         self.var_w = np.array([0.067, 0.107, 0.029])
         self.var_f = np.array([1.962, 3.31 , 1.603])
+        self.imu_msg.orientation.x  =  0
+        self.imu_msg.orientation.y  =  0
+        self.imu_msg.orientation.z  =  0
+        self.imu_msg.orientation.w  =  1
         self.imu_msg.angular_velocity_covariance = (self.I * self.var_w).flatten()
         self.imu_msg.linear_acceleration_covariance = (self.I * self.var_f).flatten()
         self.imu_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
@@ -227,9 +231,9 @@ class imu_talker():
         
         self.seq = 0
         
-        self.pub_raw = rospy.Publisher("imu/raw", Imu, queue_size = 10)
-        self.pub_mag = rospy.Publisher("imu/mag", MagneticField, queue_size = 10)
-        self.pub_temp = rospy.Publisher("imu/temp", Temperature, queue_size = 10)
+        self.pub_raw = rospy.Publisher("/imu_data", Imu, queue_size = 10)
+        self.pub_mag = rospy.Publisher("imu_data/mag", MagneticField, queue_size = 10)
+        self.pub_temp = rospy.Publisher("imu_data/temp", Temperature, queue_size = 10)
         self.log_info = ""
         self.loop_rate= rospy.Rate(1)
 
