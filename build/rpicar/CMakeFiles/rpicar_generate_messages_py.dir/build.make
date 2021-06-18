@@ -53,26 +53,26 @@ CMAKE_BINARY_DIR = /home/pi/catkin_ws/build
 # Include the progress variables for this target.
 include rpicar/CMakeFiles/rpicar_generate_messages_py.dir/progress.make
 
-rpicar/CMakeFiles/rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py
-rpicar/CMakeFiles/rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/__init__.py
+rpicar/CMakeFiles/rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/_camera.py
+rpicar/CMakeFiles/rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/__init__.py
 
 
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/lib/genpy/gensrv_py.py
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /home/pi/catkin_ws/src/rpicar/srv/camera.srv
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/sensor_msgs/msg/CameraInfo.msg
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/std_msgs/msg/Header.msg
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
+/home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/lib/genpy/gensrv_py.py
+/home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/_camera.py: /home/pi/catkin_ws/src/rpicar/srv/camera.srv
+/home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/sensor_msgs/msg/CameraInfo.msg
+/home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
+/home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/_camera.py: /opt/ros/melodic/share/std_msgs/msg/Header.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python code from SRV rpicar/camera"
-	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/melodic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv
+	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv
 
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/__init__.py: /opt/ros/melodic/lib/genpy/genmsg_py.py
-/home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/__init__.py: /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py
+/home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/__init__.py: /opt/ros/melodic/lib/genpy/genmsg_py.py
+/home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/__init__.py: /home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/_camera.py
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Python srv __init__.py for rpicar"
-	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/melodic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv --initpy
+	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv --initpy
 
 rpicar_generate_messages_py: rpicar/CMakeFiles/rpicar_generate_messages_py
-rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/_camera.py
-rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/python3/dist-packages/rpicar/srv/__init__.py
+rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/_camera.py
+rpicar_generate_messages_py: /home/pi/catkin_ws/devel/lib/python2.7/dist-packages/rpicar/srv/__init__.py
 rpicar_generate_messages_py: rpicar/CMakeFiles/rpicar_generate_messages_py.dir/build.make
 
 .PHONY : rpicar_generate_messages_py

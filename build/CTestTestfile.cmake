@@ -5,5 +5,8 @@
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.
 subdirs("gtest")
-subdirs("battery_listener")
+subdirs("viso2/libviso2")
+subdirs("viso2/viso2")
+subdirs("robot_pose_ekf")
 subdirs("rpicar")
+subdirs("viso2/viso2_ros")

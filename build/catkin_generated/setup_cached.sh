@@ -7,5 +7,6 @@
 # new environment variables
 
 # modified environment variables
+export LD_LIBRARY_PATH='/home/pi/fetched_catkin_ws/devel/lib:/opt/ros/melodic/lib'
+export PKG_CONFIG_PATH='/home/pi/fetched_catkin_ws/devel/lib/pkgconfig:/opt/ros/melodic/lib/pkgconfig'
 export PWD='/home/pi/catkin_ws/build'
-export PYTHONPATH='/home/pi/catkin_ws/devel/lib/python3/dist-packages:/opt/ros/melodic/lib/python3/dist-packages:/opt/ros/melodic/lib/python2.7/dist-packages'

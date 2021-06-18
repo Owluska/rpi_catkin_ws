@@ -19,7 +19,7 @@ add_custom_target(rpicar_generate_messages ALL)
 
 get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" NAME_WE)
 add_custom_target(_rpicar_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "rpicar" "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" "sensor_msgs/CameraInfo:std_msgs/Header:sensor_msgs/RegionOfInterest"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "rpicar" "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" "sensor_msgs/CameraInfo:sensor_msgs/RegionOfInterest:std_msgs/Header"
 )
 
 #
@@ -33,7 +33,7 @@ add_custom_target(_rpicar_generate_messages_check_deps_${_filename}
 _generate_srv_cpp(rpicar
   "/home/pi/catkin_ws/src/rpicar/srv/camera.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg"
+  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/rpicar
 )
 
@@ -66,7 +66,7 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS rpicar_generate_messages_cpp)
 _generate_srv_eus(rpicar
   "/home/pi/catkin_ws/src/rpicar/srv/camera.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg"
+  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/rpicar
 )
 
@@ -99,7 +99,7 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS rpicar_generate_messages_eus)
 _generate_srv_lisp(rpicar
   "/home/pi/catkin_ws/src/rpicar/srv/camera.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg"
+  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/rpicar
 )
 
@@ -132,7 +132,7 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS rpicar_generate_messages_lisp)
 _generate_srv_nodejs(rpicar
   "/home/pi/catkin_ws/src/rpicar/srv/camera.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg"
+  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/rpicar
 )
 
@@ -165,7 +165,7 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS rpicar_generate_messages_nodejs)
 _generate_srv_py(rpicar
   "/home/pi/catkin_ws/src/rpicar/srv/camera.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg"
+  "/opt/ros/melodic/share/sensor_msgs/cmake/../msg/CameraInfo.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/RegionOfInterest.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/rpicar
 )
 
@@ -250,7 +250,7 @@ if(TARGET sensor_msgs_generate_messages_nodejs)
 endif()
 
 if(genpy_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/rpicar)
-  install(CODE "execute_process(COMMAND \"/usr/bin/python3\" -m compileall \"${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/rpicar\")")
+  install(CODE "execute_process(COMMAND \"/usr/bin/python2\" -m compileall \"${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/rpicar\")")
   # install generated code
   install(
     DIRECTORY ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/rpicar

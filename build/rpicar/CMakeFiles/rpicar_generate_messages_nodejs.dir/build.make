@@ -59,10 +59,10 @@ rpicar/CMakeFiles/rpicar_generate_messages_nodejs: /home/pi/catkin_ws/devel/shar
 /home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/lib/gennodejs/gen_nodejs.py
 /home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv/camera.js: /home/pi/catkin_ws/src/rpicar/srv/camera.srv
 /home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/share/sensor_msgs/msg/CameraInfo.msg
-/home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/share/std_msgs/msg/Header.msg
 /home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
+/home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/share/std_msgs/msg/Header.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Javascript code from rpicar/camera.srv"
-	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/melodic/share/gennodejs/cmake/../../../lib/gennodejs/gen_nodejs.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv
+	cd /home/pi/catkin_ws/build/rpicar && ../catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/gennodejs/cmake/../../../lib/gennodejs/gen_nodejs.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv
 
 rpicar_generate_messages_nodejs: rpicar/CMakeFiles/rpicar_generate_messages_nodejs
 rpicar_generate_messages_nodejs: /home/pi/catkin_ws/devel/share/gennodejs/ros/rpicar/srv/camera.js

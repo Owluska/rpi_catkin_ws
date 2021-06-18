@@ -131,8 +131,11 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/pi/catkin_ws/build/gtest/cmake_install.cmake")
-  include("/home/pi/catkin_ws/build/battery_listener/cmake_install.cmake")
+  include("/home/pi/catkin_ws/build/viso2/libviso2/cmake_install.cmake")
+  include("/home/pi/catkin_ws/build/viso2/viso2/cmake_install.cmake")
+  include("/home/pi/catkin_ws/build/robot_pose_ekf/cmake_install.cmake")
   include("/home/pi/catkin_ws/build/rpicar/cmake_install.cmake")
+  include("/home/pi/catkin_ws/build/viso2/viso2_ros/cmake_install.cmake")
 
 endif()
 
