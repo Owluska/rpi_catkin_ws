@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 import roslib
 import rospy
 import sys
@@ -10,22 +10,24 @@ from sensor_msgs.msg import Image, CameraInfo
 
 
 class usb_cam_talker():
-#     RIGHT_CAMERA = 0
-#     LEFT_CAMERA = 2
-    camera_labels = {'right':0, 'left':2}
-    K = np.array([[7.43335820e+03, 0.00000000e+00, 4.09022733e+02],
-                  [0.00000000e+00, 7.92051299e+03, 2.73723391e+02],
-                  [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
+    K = np.array([[4486.418534, 0.000000, -144.909998],
+                  [0.000000, 4649.541611, 34.559013],
+                  [0.000000, 0.000000, 1.000000]])
     t = np.zeros((3,1))
-    #9.7 cm
-    B = 0.097
+    width = 640
+    height = 480
+    distortion = [-3.666348, 48.962889, 0.016858, 0.148182, 0.000000]
+    rectification = np.eye(3)
+    projection = np.array([[4580.996094, 0.000000, -146.452712, 0.000000],
+                          [0.000000, 4617.534668, 34.222443, 0.000000],
+                          [0.000000, 0.000000, 1.000000, 0.000000]])
+    
 #     P = np.ones((3,4), dtype = 'float64').flatten()
     
     def __init__(self, camera):
         self.camera = camera
         #print(self.camera)
         self.cap = cv2.VideoCapture(self.camera) 
-        self.topic_name = [k for k, v in self.camera_labels.items() if v == camera][0]
         #self.bridge = CvBridge()
         self.seq = 0
         self.frame_id = rospy.get_param('~frame_id', '/camera_link')
@@ -34,8 +36,8 @@ class usb_cam_talker():
         self.cam_raw_msg.is_bigendian = 1
         self.cam_info_msg = CameraInfo()
         
-        self.pub_cam_raw = rospy.Publisher("{}/image_raw".format(self.topic_name), Image, queue_size = 10)
-        self.pub_cam_info = rospy.Publisher("{}/image_info".format(self.topic_name), CameraInfo, queue_size = 10)
+        self.pub_cam_raw = rospy.Publisher("camera/image_raw", Image, queue_size = 10)
+        self.pub_cam_info = rospy.Publisher("camera/image_info", CameraInfo, queue_size = 10)
         self.log_info = ""
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
         self.loop_rate= rospy.Rate(self.fps)
@@ -45,29 +47,14 @@ class usb_cam_talker():
     def talker(self):
         ret, frame = self.cap.read()        
         if ret:            
-            #try:
-                #publish camera image
-                # self.cam_raw_msg.header.stamp = rospy.Time.now()
-                # self.cam_raw_msg.header.seq = self.seq
-                # self.cam_raw_msg.header.frame_id = self.frame_id
-                
-                #image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-                #cv2.imshow("gray", image)
-                #key = cv2.waitKey(1) & 0xFF
-                #np_array = np.zeros((width*height), np.uint8)
-                #image_np = np.asarray(image, np.uint8)
-                #self.cam_raw_msg.data = image_np.tolist()
-
-                #self.cam_raw_msg.height = height
-                #self.cam_raw_msg.width = width
-
                 self.failure_counter = 0
 
                 self.cam_raw_msg = CvBridge().cv2_to_imgmsg(frame, "bgr8")
                 self.cam_raw_msg.header.stamp = rospy.Time.now()
                 self.cam_raw_msg.header.seq = self.seq
-                self.cam_raw_msg.header.frame_id = self.frame_id               
+                self.cam_raw_msg.header.frame_id = self.frame_id
+                self.cam_raw_msg.height = self.height
+                self.cam_raw_msg.width = self.width
 
                 try:
                     self.pub_cam_raw.publish(self.cam_raw_msg)
@@ -78,17 +65,15 @@ class usb_cam_talker():
                 self.cam_info_msg.header.stamp = rospy.Time.now()
                 self.cam_info_msg.header.seq = self.seq
                 self.cam_info_msg.header.frame_id = self.frame_id
+
+                self.cam_info_msg.height = self.height
+                self.cam_info_msg.width = self.width
+                self.cam_info_msg.K = list(self.K.flatten())
                 
-                width = frame.shape[1]
-                height = frame.shape[0]
-                self.cam_info_msg.height = height
-                self.cam_info_msg.width = width
-                self.cam_info_msg.K = self.K.flatten()
-                #print(self.cam_info_msg.K)
-                if self.topic_name == 'right':
-                    self.t[0,0] = -self.K[0,0] * self.B
-                
-                self.cam_info_msg.P = np.hstack((self.K, self.t)).flatten()
+                self.cam_info_msg.P = self.projection.flatten()
+                self.cam_info_msg.D = self.distortion
+                self.cam_info_msg.R = self.rectification.flatten()
+    
                 #print(self.cam_info_msg.P)
                 
                 self.pub_cam_info.publish(self.cam_info_msg)
@@ -120,18 +105,11 @@ class usb_cam_talker():
             self.talker()
             self.seq += 1
             self.loop_rate.sleep()
-#         try:
-#             self.talker()
-#             self.seq += 1
-#             rospy.spin()
-#         except KeyboardInterrupt:
-#             print("Shutting down")
-#         cv2.destroyAllWindows()
             
 
 def main(args):
     rospy.init_node('camera_talker', anonymous = True)
-    default = None
+    default = 0
     camera = int(rospy.get_param('~camera', default))
     #print(camera)
     
