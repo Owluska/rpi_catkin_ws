@@ -1,20 +1,19 @@
 <launch>
- 	<!-- battery, IMU & US drivers for ROS -->
+  <!-- battery, IMU & US drivers for ROS -->
   <node pkg="rpicar" type="battery_talker.py" name="battery"/>
 	<node pkg="rpicar" type="IMU_talker.py" name="imu"/> 
   <node pkg="rpicar" type="US_talker.py" name="US1">
-  		<param name="US_number" value="1"/>
+       <param name="US_number" value="1"/>
   </node>
   <node pkg="rpicar" type="US_talker.py" name="US2">
-  		<param name="US_number" value="2"/>
+       <param name="US_number" value="2"/>
   </node>
-  <node pkg="rpicar" type="camera_talker.py" name="camera"/>	
-
+  <!-- Run usb camera driver -->
+  <node pkg="rpicar" type="camera_talker.py" name="camera"/>  
+  <!-- Set usb camera topics name -->
   <arg name="camera" default="/usb_camera"/>
-
-  <!-- Run the stereo image proc -->
+  <!-- Run the mono image proc -->
   <node ns="$(arg camera)" pkg="image_proc" type="image_proc" name="image_proc" />
-
   <!-- Viso2 -->
   <node pkg="viso2_ros" type="mono_odometer" name="mono_odometer">
     <remap from="image" to="$(arg camera)/image_rect"/>
@@ -23,8 +22,12 @@
     <param name="camera_height" value="1.0" />
     <param name="camera_pitch"  value="0.0" />
   </node>
-
+  <!-- Start static transfrom publisher-->
+  <!-- static_transfrom_publisher x y z qx qy qz qw frame_id child_frame_id period_in_ms-->
+  <node pkg="tf" type="static_transform_publisher" name="usb_camera_link_broadcaster" args = "0.18 0.05 0.05 0 0 0 1 $(arg camera) /usb_camera/ 100"/>
+  <!-- Set parameters for EKF -->
   <rosparam param="imu0_config"> [true,true,false,false,false,true,true,true,false,false,false,true,true,true,true] </rosparam>
+  <!-- Run the EKF -->
   <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
 		<param name="output_frame" value="odom_combined"/>
 		<param name="base_footprint_frame" value="base_footprint"/>
