@@ -1,2 +1,0 @@
-robot_pose_ekf:rpicar:viso2/libviso2:viso2/viso2:viso2/viso2_ros
--DCATKIN_DEVEL_PREFIX=/home/pi/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/pi/catkin_ws/install -G Unix Makefiles

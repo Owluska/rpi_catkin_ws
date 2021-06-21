@@ -1,0 +1,1 @@
+set(ORDERED_PATHS "/home/pi/catkin_ws/devel_isolated/libviso2/lib;/opt/ros/melodic/lib")

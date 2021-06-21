@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_ws/devel_isolated/viso2_ros
+
+Name: viso2_ros
+Description: Description of viso2_ros
+Version: 0.0.1
+Cflags: -I/home/pi/catkin_ws/devel_isolated/viso2_ros/include
+Libs: -L${prefix}/lib 
+Requires: 
