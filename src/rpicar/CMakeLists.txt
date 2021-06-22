@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   std_msgs
   sensor_msgs
+  nav_msgs
   message_generation 
 )
 
@@ -74,6 +75,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   sensor_msgs
+  nav_msgs
 )
 
 ################################################
@@ -109,7 +111,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rpicar
  CATKIN_DEPENDS rospy cv_bridge 
- CATKIN_DEPENDS std_msgs sensor_msgs message_runtime
+ CATKIN_DEPENDS std_msgs sensor_msgs nav_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -165,7 +167,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
  catkin_install_python(PROGRAMS
    src/scripts/battery_talker.py src/scripts/US_talker.py src/scripts/IMU_talker.py src/scripts/camera_talker.py
-   src/scripts/camera_client_service.py src/scripts/2cameras_talker.py 
+   src/scripts/autopilot.py src/scripts/tf_camera_publisher.py  src/scripts/vo_covariance_talker.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 

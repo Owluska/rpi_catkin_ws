@@ -204,11 +204,15 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/rpicar" TYPE PROGRAM FILES "/home/pi/catkin_ws/build_isolated/rpicar/catkin_generated/installspace/camera_client_service.py")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/rpicar" TYPE PROGRAM FILES "/home/pi/catkin_ws/build_isolated/rpicar/catkin_generated/installspace/autopilot.py")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/rpicar" TYPE PROGRAM FILES "/home/pi/catkin_ws/build_isolated/rpicar/catkin_generated/installspace/2cameras_talker.py")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/rpicar" TYPE PROGRAM FILES "/home/pi/catkin_ws/build_isolated/rpicar/catkin_generated/installspace/tf_camera_publisher.py")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/rpicar" TYPE PROGRAM FILES "/home/pi/catkin_ws/build_isolated/rpicar/catkin_generated/installspace/vo_covariance_talker.py")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)

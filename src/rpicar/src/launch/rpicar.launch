@@ -42,6 +42,9 @@
 		<param name="imu0" value="/imu_data"/>
 		<!--remap from="vo" to="mono_odometer/odometry"/-->
 		<remap from="odom" to="pr2_base_odometry/odom"/>
-   </node>  
+   </node>
+    <!-- Start autopilot node -->
+    <!-- launch-prefix="sudo"-->
+   <node pkg="rpicar" type="autopilot.py" name="autopilot"/>  
 </launch>
 

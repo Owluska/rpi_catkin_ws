@@ -62,7 +62,7 @@ CMakeFiles/rpicar_generate_messages_lisp: /home/pi/catkin_ws/devel_isolated/rpic
 /home/pi/catkin_ws/devel_isolated/rpicar/share/common-lisp/ros/rpicar/srv/camera.lisp: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
 /home/pi/catkin_ws/devel_isolated/rpicar/share/common-lisp/ros/rpicar/srv/camera.lisp: /opt/ros/melodic/share/std_msgs/msg/Header.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Lisp code from rpicar/camera.srv"
-	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/genlisp/cmake/../../../lib/genlisp/gen_lisp.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/share/common-lisp/ros/rpicar/srv
+	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/genlisp/cmake/../../../lib/genlisp/gen_lisp.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/share/common-lisp/ros/rpicar/srv
 
 rpicar_generate_messages_lisp: CMakeFiles/rpicar_generate_messages_lisp
 rpicar_generate_messages_lisp: /home/pi/catkin_ws/devel_isolated/rpicar/share/common-lisp/ros/rpicar/srv/camera.lisp

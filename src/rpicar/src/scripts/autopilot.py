@@ -1,6 +1,10 @@
 #! /usr/bin/env python3
-from sensor_msgs.msg import Range, BatteryState
+
 import wiringpi
+import roslib
+import rospy
+from sensor_msgs.msg import Range, BatteryState
+from nav_msgs.msg import Odometry
 
 class us_mvmnt():
     min_voltage = 6.5
@@ -16,6 +20,7 @@ class us_mvmnt():
         self.us1_sub = rospy.Subscriber(US1_topic, Range, self.us1_callback, queue_size = 10)
         self.us2_sub = rospy.Subscriber(US2_topic, Range, self.us2_callback, queue_size = 10)
         self.bat_sub = rospy.Subscriber("battery_state", BatteryState, self.bat_callback, queue_size = 10)
+        self.odom_sub = rospy.Subscriber("robot_pose_ekf/odom_combined", Odometry, self.pos_callback, queue_size = 10)
         self.state_status = ""
         self.loop_rate = rospy.Rate(0.1)
         
@@ -23,6 +28,8 @@ class us_mvmnt():
         self.range_value1 = 0.0
         self.range_value2 = 0.0
         self.min_range = 0.02
+        self.point = [0, 0, 0]
+        self.quaternion = [0, 0, 0, 1]
         self.car_init()
     
     def us1_callback(self, msg):
@@ -39,6 +46,9 @@ class us_mvmnt():
         self.battery_voltage = msg.voltage
         if msg.voltage <= self.min_voltage:
             self.state_status = "Undervoltage"
+    def pos_callback(self, msg):
+        self.point = msg.pose.pose.point
+        self.quaternion = msg.pose.pose.quternion
     
     def car_init(self):
         wiringpi.wiringPiSetupGpio()
@@ -79,9 +89,10 @@ class us_mvmnt():
     def turn_center(self):
         wiringpi.pwmWrite(self.RUL, self.RUL_CENTER)
         
-    def random_movement():       
+    def random_movement(self):       
         if self.state_status == "Undervoltage":
             self.stop()
+            self.turn_center()
             rospy.loginfo(self.state_status + ", so ending node..")
             rospy.on_shutdown(self.state_status)
             return -1
@@ -90,7 +101,7 @@ class us_mvmnt():
             if self.range_value1 <= self.min_range:
                 self.turn_right()
                 self.move_forward()
-            elif
+            elif self.range_value2 <= self.min_range:
                 self.turn_left()
                 self.move_forward()
         else:
@@ -101,12 +112,16 @@ class us_mvmnt():
         while not rospy.is_shutdown():
             self.random_movement() 
             self.loop_rate.sleep()
+            print("{} s, {} m, ".format(rospy.Time, self.point, self.quaternion))
+        self.stop()
+        self.turn_center()
             
         
 def main():
     rospy.init_node('car_us_movement', anonymous = True)
     US1 = str(rospy.get_param('~US1_topic', default="US1_data"))
     US2 = str(rospy.get_param('~US2_topic', default="US2_data"))
+    print(US1, US2)
     m = us_mvmnt(US1, US2)
     m.loop()
 

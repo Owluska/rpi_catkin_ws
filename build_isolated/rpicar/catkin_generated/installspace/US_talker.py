@@ -95,7 +95,11 @@ class US_talker():
             
     def range_talker(self):
         self.range_msg.header.stamp = rospy.Time.now()
-        self.range_msg.range = self.US.get_distance() * 1e-2
+        try:
+            self.range_msg.range = self.US.get_distance() * 1e-2
+        except Exception as e:
+            rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
+
         self.range_msg.header.seq = self.seq
         self.range_pub.publish(self.range_msg)
         #self.log_info = "Back distance from US#{:s}, {:.2f} [m]".format(self.US_label, self.data)   

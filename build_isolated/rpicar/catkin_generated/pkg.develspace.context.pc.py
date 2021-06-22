@@ -1,7 +1,7 @@
 # generated from catkin/cmake/template/pkg.context.pc.in
 CATKIN_PACKAGE_PREFIX = ""
 PROJECT_PKG_CONFIG_INCLUDE_DIRS = "/home/pi/catkin_ws/devel_isolated/rpicar/include".split(';') if "/home/pi/catkin_ws/devel_isolated/rpicar/include" != "" else []
-PROJECT_CATKIN_DEPENDS = "rospy;cv_bridge;std_msgs;sensor_msgs;message_runtime".replace(';', ' ')
+PROJECT_CATKIN_DEPENDS = "rospy;cv_bridge;std_msgs;sensor_msgs;nav_msgs;message_runtime".replace(';', ' ')
 PKG_CONFIG_LIBRARIES_WITH_PREFIX = "".split(';') if "" != "" else []
 PROJECT_NAME = "rpicar"
 PROJECT_SPACE_DIR = "/home/pi/catkin_ws/devel_isolated/rpicar"

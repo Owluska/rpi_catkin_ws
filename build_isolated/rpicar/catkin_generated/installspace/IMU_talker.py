@@ -268,7 +268,11 @@ class imu_talker():
         return mpu_cal
     
     def talker(self):
-        _ = self.calibrated_mpu9250()
+        try:
+            _ = self.calibrated_mpu9250()
+        except Exception as e:
+            rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
+
         self.temp = self.imu.read_temp()
         
         #publish imu acceleration and gyro
@@ -317,3 +321,4 @@ if __name__ == '__main__':
 #---------debugging content
 # talker = imu_talker()
 # print(talker.calibrated_mpu9250())
+
