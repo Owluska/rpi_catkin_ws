@@ -1,8 +1,10 @@
 #! /usr/bin/env python3
+
+import wiringpi
+import roslib
+import rospy
 from sensor_msgs.msg import Range, BatteryState
 from nav_msgs.msg import Odometry
-import wiringpi
-import rospy
 
 class us_mvmnt():
     min_voltage = 6.5
