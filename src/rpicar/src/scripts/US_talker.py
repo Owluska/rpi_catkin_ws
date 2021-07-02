@@ -98,7 +98,10 @@ class US_talker():
         try:
             self.range_msg.range = self.US.get_distance() * 1e-2
         except Exception as e:
-            rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
+            if self.US.get_distance() == None:
+                rospy.loginfo("Error connecting to US{}".format(self.US_label))
+            else:
+                rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
 
         self.range_msg.header.seq = self.seq
         self.range_pub.publish(self.range_msg)
@@ -125,6 +128,7 @@ def main(args):
     default_label = None
 
     label = str(rospy.get_param('~US_number', default_label))
+    #rosrun rpicar US_talker.py _US_number:=1
     #print(label)
     try:
         if label == '1':
@@ -139,7 +143,7 @@ def main(args):
     except Exception as e:
             template = "An exception of type {0} occured. Arguments:\n{1!r}"
             message = template.format(type(e).__name__, e.args)
-            rospy.loginfo(message)
+            print(message)
             return
             
     US_ = US(trig = trig, echo = echo)

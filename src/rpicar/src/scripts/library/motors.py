@@ -26,7 +26,7 @@ import math
 import smbus
 
 # Registers/etc:
-PCA9685_ADDRESS    = 0x70
+PCA9685_ADDRESS    = 0x19#0x70
 MODE1              = 0x00
 MODE2              = 0x01
 SUBADR1            = 0x02
@@ -51,9 +51,6 @@ OUTDRV             = 0x04
 
 
 logger = logging.getLogger(__name__)
-
-
-
 
 
 class PCA9685(object):
@@ -186,32 +183,42 @@ class car_movement_PCA9685():
 
 
 
+
 pwm = PCA9685()
 car = car_movement_PCA9685(pwm)
-# while True:
-    # stop = False
-    # for i in range(1, 11):
-    #     try:
-    #         car.move_forward(velocity = 10 * i)
-    #         time.sleep(1)
-    #         car.move_backward(velocity = 10 * i)
-    #         time.sleep(1)
-    #     except KeyboardInterrupt:
-    #         car.stop_all()
-    #         stop = True
-    #         break
-    # if stop:
-    #     break
+debug = "None"
+
+if debug == "motors":
+    while True:
+        stop = False
+        for i in range(1, 11):
+            try:
+                car.move_forward(velocity = 10 * i)
+                time.sleep(1)
+                car.move_backward(velocity = 10 * i)
+                time.sleep(1)
+            except KeyboardInterrupt:
+                car.stop_all()
+                stop = True
+                break
+        if stop:
+            break
+
+elif debug == "servos":
+    while True:
+        stop = False
+        for i in range(40, 141, 5):
+            try:
+                car.turn(degree = i)
+                time.sleep(1)
+            except KeyboardInterrupt:
+                car.stop_all()
+                stop = True
+                break
+        if stop:
+            break
 
 
-    # stop = False
-    # for i in range(40, 141, 5):
-    #     try:
-    #         car.turn(degree = i)
-    #         time.sleep(1)
-    #     except KeyboardInterrupt:
-    #         car.stop_all()
-    #         stop = True
-    #         break
-    # if stop:
-    #     break
+
+
+

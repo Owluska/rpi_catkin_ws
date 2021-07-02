@@ -7,9 +7,14 @@ from sensor_msgs.msg import BatteryState
 from ina219 import INA219
 from time import time, sleep
 from datetime import datetime
+from library.multiplexer import PCA9547
 
 class battery_state_proc():
     def __init__(self):
+        self.ch = 0
+        self.pca = PCA9547()
+        self.pca.set_channel(self.ch)
+        
         self.ina = None
         self.adress = 0x40
         
