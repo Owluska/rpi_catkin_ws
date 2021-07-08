@@ -10,13 +10,13 @@ from datetime import datetime
 from library.multiplexer import PCA9547
 
 class battery_state_proc():
-    def __init__(self):
+    def __init__(self, adress = 0x41):
         self.ch = 0
-        self.pca = PCA9547()
+        #self.pca = PCA9547()
         self.pca.set_channel(self.ch)
         
         self.ina = None
-        self.adress = 0x40
+        self.adress = adress
         
         self.shunt_res = 0.01
         
@@ -110,12 +110,7 @@ class battery_state_proc():
             self.loop_rate.sleep()
             
         
-
-
-
-
 if __name__ == '__main__':
-    rospy.init_node('battery_state_tracker', anonymous = True)
-    
-    bs = battery_state_proc()
+    rospy.init_node('battery_state_tracker', anonymous = True)   
+    bs = battery_state_proc(0x41)
     bs.start()
