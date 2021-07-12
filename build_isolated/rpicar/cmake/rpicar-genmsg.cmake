@@ -1,8 +1,8 @@
 # generated from genmsg/cmake/pkg-genmsg.cmake.em
 
-message(STATUS "rpicar: 0 messages, 1 services")
+message(STATUS "rpicar: 1 messages, 1 services")
 
-set(MSG_I_FLAGS "-Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg;-Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg;-Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg;-Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg")
+set(MSG_I_FLAGS "-Irpicar:/home/pi/catkin_ws/src/rpicar/msg;-Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg;-Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg;-Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg;-Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg")
 
 # Find all generators
 find_package(gencpp REQUIRED)
@@ -22,12 +22,23 @@ add_custom_target(_rpicar_generate_messages_check_deps_${_filename}
   COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "rpicar" "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" "sensor_msgs/CameraInfo:sensor_msgs/RegionOfInterest:std_msgs/Header"
 )
 
+get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg" NAME_WE)
+add_custom_target(_rpicar_generate_messages_check_deps_${_filename}
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "rpicar" "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg" "nav_msgs/Odometry:geometry_msgs/Pose:sensor_msgs/MagneticField:sensor_msgs/Temperature:geometry_msgs/TwistWithCovariance:geometry_msgs/Vector3:sensor_msgs/Range:geometry_msgs/PoseWithCovarianceStamped:geometry_msgs/PoseWithCovariance:std_msgs/Header:geometry_msgs/Twist:sensor_msgs/Imu:sensor_msgs/BatteryState:geometry_msgs/Point:geometry_msgs/Quaternion"
+)
+
 #
 #  langs = gencpp;geneus;genlisp;gennodejs;genpy
 #
 
 ### Section generating for lang: gencpp
 ### Generating Messages
+_generate_msg_cpp(rpicar
+  "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/melodic/share/nav_msgs/cmake/../msg/Odometry.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/MagneticField.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Temperature.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/TwistWithCovariance.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Range.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Twist.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Imu.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/BatteryState.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Quaternion.msg"
+  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/rpicar
+)
 
 ### Generating Services
 _generate_srv_cpp(rpicar
@@ -51,6 +62,8 @@ add_dependencies(rpicar_generate_messages rpicar_generate_messages_cpp)
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" NAME_WE)
 add_dependencies(rpicar_generate_messages_cpp _rpicar_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg" NAME_WE)
+add_dependencies(rpicar_generate_messages_cpp _rpicar_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
 add_custom_target(rpicar_gencpp)
@@ -61,6 +74,12 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS rpicar_generate_messages_cpp)
 
 ### Section generating for lang: geneus
 ### Generating Messages
+_generate_msg_eus(rpicar
+  "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/melodic/share/nav_msgs/cmake/../msg/Odometry.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/MagneticField.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Temperature.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/TwistWithCovariance.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Range.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Twist.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Imu.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/BatteryState.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Quaternion.msg"
+  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/rpicar
+)
 
 ### Generating Services
 _generate_srv_eus(rpicar
@@ -84,6 +103,8 @@ add_dependencies(rpicar_generate_messages rpicar_generate_messages_eus)
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" NAME_WE)
 add_dependencies(rpicar_generate_messages_eus _rpicar_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg" NAME_WE)
+add_dependencies(rpicar_generate_messages_eus _rpicar_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
 add_custom_target(rpicar_geneus)
@@ -94,6 +115,12 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS rpicar_generate_messages_eus)
 
 ### Section generating for lang: genlisp
 ### Generating Messages
+_generate_msg_lisp(rpicar
+  "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/melodic/share/nav_msgs/cmake/../msg/Odometry.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/MagneticField.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Temperature.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/TwistWithCovariance.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Range.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Twist.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Imu.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/BatteryState.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Quaternion.msg"
+  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/rpicar
+)
 
 ### Generating Services
 _generate_srv_lisp(rpicar
@@ -117,6 +144,8 @@ add_dependencies(rpicar_generate_messages rpicar_generate_messages_lisp)
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" NAME_WE)
 add_dependencies(rpicar_generate_messages_lisp _rpicar_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg" NAME_WE)
+add_dependencies(rpicar_generate_messages_lisp _rpicar_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
 add_custom_target(rpicar_genlisp)
@@ -127,6 +156,12 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS rpicar_generate_messages_lisp)
 
 ### Section generating for lang: gennodejs
 ### Generating Messages
+_generate_msg_nodejs(rpicar
+  "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/melodic/share/nav_msgs/cmake/../msg/Odometry.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/MagneticField.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Temperature.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/TwistWithCovariance.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Range.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Twist.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Imu.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/BatteryState.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Quaternion.msg"
+  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/rpicar
+)
 
 ### Generating Services
 _generate_srv_nodejs(rpicar
@@ -150,6 +185,8 @@ add_dependencies(rpicar_generate_messages rpicar_generate_messages_nodejs)
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" NAME_WE)
 add_dependencies(rpicar_generate_messages_nodejs _rpicar_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg" NAME_WE)
+add_dependencies(rpicar_generate_messages_nodejs _rpicar_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
 add_custom_target(rpicar_gennodejs)
@@ -160,6 +197,12 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS rpicar_generate_messages_nodejs)
 
 ### Section generating for lang: genpy
 ### Generating Messages
+_generate_msg_py(rpicar
+  "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/melodic/share/nav_msgs/cmake/../msg/Odometry.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/MagneticField.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Temperature.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/TwistWithCovariance.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Range.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovarianceStamped.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/PoseWithCovariance.msg;/opt/ros/melodic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Twist.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/Imu.msg;/opt/ros/melodic/share/sensor_msgs/cmake/../msg/BatteryState.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/melodic/share/geometry_msgs/cmake/../msg/Quaternion.msg"
+  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/rpicar
+)
 
 ### Generating Services
 _generate_srv_py(rpicar
@@ -182,6 +225,8 @@ add_dependencies(rpicar_generate_messages rpicar_generate_messages_py)
 
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/srv/camera.srv" NAME_WE)
+add_dependencies(rpicar_generate_messages_py _rpicar_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/pi/catkin_ws/src/rpicar/msg/telemetry.msg" NAME_WE)
 add_dependencies(rpicar_generate_messages_py _rpicar_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility

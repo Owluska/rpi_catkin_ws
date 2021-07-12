@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "/home/pi/catkin_ws/devel_isolated/rpicar/share/common-lisp/ros/rpicar/msg/telemetry.lisp"
   "/home/pi/catkin_ws/devel_isolated/rpicar/share/common-lisp/ros/rpicar/srv/camera.lisp"
   "CMakeFiles/rpicar_generate_messages_lisp"
 )

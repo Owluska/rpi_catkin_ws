@@ -53,8 +53,30 @@ CMAKE_BINARY_DIR = /home/pi/catkin_ws/build_isolated/rpicar
 # Include the progress variables for this target.
 include CMakeFiles/rpicar_generate_messages_cpp.dir/progress.make
 
+CMakeFiles/rpicar_generate_messages_cpp: /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h
 CMakeFiles/rpicar_generate_messages_cpp: /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/camera.h
 
+
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/lib/gencpp/gen_cpp.py
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /home/pi/catkin_ws/src/rpicar/msg/telemetry.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/nav_msgs/msg/Odometry.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/geometry_msgs/msg/Pose.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/sensor_msgs/msg/MagneticField.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/sensor_msgs/msg/Temperature.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/geometry_msgs/msg/TwistWithCovariance.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/geometry_msgs/msg/Vector3.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/sensor_msgs/msg/Range.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/geometry_msgs/msg/PoseWithCovarianceStamped.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/geometry_msgs/msg/PoseWithCovariance.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/std_msgs/msg/Header.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/geometry_msgs/msg/Twist.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/sensor_msgs/msg/Imu.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/sensor_msgs/msg/BatteryState.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/geometry_msgs/msg/Point.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/geometry_msgs/msg/Quaternion.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h: /opt/ros/melodic/share/gencpp/msg.h.template
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating C++ code from rpicar/telemetry.msg"
+	cd /home/pi/catkin_ws/src/rpicar && /home/pi/catkin_ws/build_isolated/rpicar/catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/pi/catkin_ws/src/rpicar/msg/telemetry.msg -Irpicar:/home/pi/catkin_ws/src/rpicar/msg -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar -e /opt/ros/melodic/share/gencpp/cmake/..
 
 /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/camera.h: /opt/ros/melodic/lib/gencpp/gen_cpp.py
 /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/camera.h: /home/pi/catkin_ws/src/rpicar/srv/camera.srv
@@ -63,10 +85,11 @@ CMakeFiles/rpicar_generate_messages_cpp: /home/pi/catkin_ws/devel_isolated/rpica
 /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/camera.h: /opt/ros/melodic/share/std_msgs/msg/Header.msg
 /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/camera.h: /opt/ros/melodic/share/gencpp/msg.h.template
 /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/camera.h: /opt/ros/melodic/share/gencpp/srv.h.template
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating C++ code from rpicar/camera.srv"
-	cd /home/pi/catkin_ws/src/rpicar && /home/pi/catkin_ws/build_isolated/rpicar/catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar -e /opt/ros/melodic/share/gencpp/cmake/..
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating C++ code from rpicar/camera.srv"
+	cd /home/pi/catkin_ws/src/rpicar && /home/pi/catkin_ws/build_isolated/rpicar/catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Irpicar:/home/pi/catkin_ws/src/rpicar/msg -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar -e /opt/ros/melodic/share/gencpp/cmake/..
 
 rpicar_generate_messages_cpp: CMakeFiles/rpicar_generate_messages_cpp
+rpicar_generate_messages_cpp: /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h
 rpicar_generate_messages_cpp: /home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/camera.h
 rpicar_generate_messages_cpp: CMakeFiles/rpicar_generate_messages_cpp.dir/build.make
 

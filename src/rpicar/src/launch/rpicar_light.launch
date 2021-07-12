@@ -25,6 +25,6 @@
     <param name="camera_pitch"  value="0.0" />
   </node>
   <!-- <node pkg="tf" type="static_transform_publisher" name="usb_camera_link_broadcaster" args="1 0 0 0 0 0 1 usb_camera/ usb_camera 100" /> -->
-  <node pkg="rpicar" type="autopilot.py" name="autopilot"/>  
+  <node pkg="rpicar" type="autopilot.py" name="car_us_movement"/>  
 </launch>
 

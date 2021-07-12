@@ -53,18 +53,40 @@ CMAKE_BINARY_DIR = /home/pi/catkin_ws/build_isolated/rpicar
 # Include the progress variables for this target.
 include CMakeFiles/rpicar_generate_messages_nodejs.dir/progress.make
 
+CMakeFiles/rpicar_generate_messages_nodejs: /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js
 CMakeFiles/rpicar_generate_messages_nodejs: /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv/camera.js
 
+
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/lib/gennodejs/gen_nodejs.py
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /home/pi/catkin_ws/src/rpicar/msg/telemetry.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/nav_msgs/msg/Odometry.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/geometry_msgs/msg/Pose.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/sensor_msgs/msg/MagneticField.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/sensor_msgs/msg/Temperature.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/geometry_msgs/msg/TwistWithCovariance.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/geometry_msgs/msg/Vector3.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/sensor_msgs/msg/Range.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/geometry_msgs/msg/PoseWithCovarianceStamped.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/geometry_msgs/msg/PoseWithCovariance.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/std_msgs/msg/Header.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/geometry_msgs/msg/Twist.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/sensor_msgs/msg/Imu.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/sensor_msgs/msg/BatteryState.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/geometry_msgs/msg/Point.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js: /opt/ros/melodic/share/geometry_msgs/msg/Quaternion.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Javascript code from rpicar/telemetry.msg"
+	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/gennodejs/cmake/../../../lib/gennodejs/gen_nodejs.py /home/pi/catkin_ws/src/rpicar/msg/telemetry.msg -Irpicar:/home/pi/catkin_ws/src/rpicar/msg -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg
 
 /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/lib/gennodejs/gen_nodejs.py
 /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv/camera.js: /home/pi/catkin_ws/src/rpicar/srv/camera.srv
 /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/share/sensor_msgs/msg/CameraInfo.msg
 /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
 /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv/camera.js: /opt/ros/melodic/share/std_msgs/msg/Header.msg
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Javascript code from rpicar/camera.srv"
-	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/gennodejs/cmake/../../../lib/gennodejs/gen_nodejs.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Javascript code from rpicar/camera.srv"
+	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/gennodejs/cmake/../../../lib/gennodejs/gen_nodejs.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Irpicar:/home/pi/catkin_ws/src/rpicar/msg -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv
 
 rpicar_generate_messages_nodejs: CMakeFiles/rpicar_generate_messages_nodejs
+rpicar_generate_messages_nodejs: /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js
 rpicar_generate_messages_nodejs: /home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv/camera.js
 rpicar_generate_messages_nodejs: CMakeFiles/rpicar_generate_messages_nodejs.dir/build.make
 

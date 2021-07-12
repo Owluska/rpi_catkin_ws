@@ -5,181 +5,9 @@ import sys
 from sensor_msgs.msg import Imu, Temperature, MagneticField
 from std_msgs.msg import Float32
 
-
+from library.mpu9250_lib import mpu9250
+from rpicar.msg import telemetry
 import numpy as np
-
-
-
-import smbus
-import time
-
-class mpu9250:
-    # MPU6050 Registers
-    MPU6050_ADDR = 0x68
-    PWR_MGMT_1   = 0x6B
-    SMPLRT_DIV   = 0x19
-    CONFIG       = 0x1A
-    GYRO_CONFIG  = 0x1B
-    ACCEL_CONFIG = 0x1C
-    INT_PIN_CFG  = 0x37
-    INT_ENABLE   = 0x38
-    ACCEL_XOUT_H = 0x3B
-    ACCEL_YOUT_H = 0x3D
-    ACCEL_ZOUT_H = 0x3F
-    TEMP_OUT_H   = 0x41
-    GYRO_XOUT_H  = 0x43
-    GYRO_YOUT_H  = 0x45
-    GYRO_ZOUT_H  = 0x47
-    #AK8963 registers
-    AK8963_ADDR   = 0x0C
-    AK8963_ST1    = 0x02
-    HXH          = 0x04
-    HYH          = 0x06
-    HZH          = 0x08
-    AK8963_ST1   = 0x02
-    AK8963_ST2   = 0x09
-    AK8963_CNTL  = 0x0A
-    AK8963_ASAX = 0x10
-    def __init__(self):
-        self.mag_sens = 4800.0 # magnetometer sensitivity: 4800 uT
-
-        # start I2C driver
-        self.bus = smbus.SMBus(1) # start comm with i2c bus
-        time.sleep(0.1)
-        self.gyro_sens, self.accel_sens = self.MPU6050_start() # instantiate gyro/accel
-        time.sleep(0.1)
-        AK8963_coeffs = self.AK8963_start() # instantiate magnetometer
-        time.sleep(0.1)
-        
-    def MPU6050_start(self):
-        # reset all sensors
-        self.bus.write_byte_data(self.MPU6050_ADDR,self.PWR_MGMT_1,0x80)
-        time.sleep(0.1)
-        self.bus.write_byte_data(self.MPU6050_ADDR,self.PWR_MGMT_1,0x00)
-        time.sleep(0.1)
-        # power management and crystal settings
-        self.bus.write_byte_data(self.MPU6050_ADDR, self.PWR_MGMT_1, 0x01)
-        time.sleep(0.1)
-        # alter sample rate (stability)
-        samp_rate_div = 0 # sample rate = 8 kHz/(1+samp_rate_div)
-        self.bus.write_byte_data(self.MPU6050_ADDR, self.SMPLRT_DIV, samp_rate_div)
-        time.sleep(0.1)
-        #Write to Configuration register
-        self.bus.write_byte_data(self.MPU6050_ADDR, self.CONFIG, 0)
-        time.sleep(0.1)
-        #Write to Gyro configuration register
-        gyro_config_sel = [0b00000,0b01000,0b10000,0b11000] # byte registers
-        gyro_config_vals = [250.0,500.0,1000.0,2000.0] # degrees/sec
-        gyro_indx = 0
-        self.bus.write_byte_data(self.MPU6050_ADDR, self.GYRO_CONFIG, int(gyro_config_sel[gyro_indx]))
-        time.sleep(0.1)
-        #Write to Accel configuration register
-        accel_config_sel = [0b00000,0b01000,0b10000,0b11000] # byte registers
-        accel_config_vals = [2.0,4.0,8.0,16.0] # g (g = 9.81 m/s^2)
-        accel_indx = 0
-        self.bus.write_byte_data(self.MPU6050_ADDR, self.ACCEL_CONFIG, int(accel_config_sel[accel_indx]))
-        time.sleep(0.1)
-        # interrupt register (related to overflow of data [FIFO])
-        self.bus.write_byte_data(self.MPU6050_ADDR,self.INT_PIN_CFG,0x22)
-        time.sleep(0.1)
-        # enable the AK8963 magnetometer in pass-through mode
-        self.bus.write_byte_data(self.MPU6050_ADDR, self.INT_ENABLE, 1)
-        time.sleep(0.1)
-        return gyro_config_vals[gyro_indx],accel_config_vals[accel_indx]
-
-    def read_raw_bits(self, register):
-        # read accel and gyro values
-        high = self.bus.read_byte_data(self.MPU6050_ADDR, register)
-        low = self.bus.read_byte_data(self.MPU6050_ADDR, register+1)
-
-        # combine higha and low for unsigned bit value
-        value = ((high << 8) | low)
-        
-        # convert to +- value
-        if(value > 32768):
-            value -= 65536
-        return value
-
-    def mpu6050_conv(self):
-        # raw acceleration bits
-        acc_x = self.read_raw_bits(self.ACCEL_XOUT_H)
-        acc_y = self.read_raw_bits(self.ACCEL_YOUT_H)
-        acc_z = self.read_raw_bits(self.ACCEL_ZOUT_H)
-        
-        # raw gyroscope bits
-        gyro_x = self.read_raw_bits(self.GYRO_XOUT_H)
-        gyro_y = self.read_raw_bits(self.GYRO_YOUT_H)
-        gyro_z = self.read_raw_bits(self.GYRO_ZOUT_H)
-
-        #convert to acceleration in g and gyro dps
-        a_x = (acc_x/(2.0**15.0))*self.accel_sens
-        a_y = (acc_y/(2.0**15.0))*self.accel_sens
-        a_z = (acc_z/(2.0**15.0))*self.accel_sens
-
-        w_x = (gyro_x/(2.0**15.0))*self.gyro_sens
-        w_y = (gyro_y/(2.0**15.0))*self.gyro_sens
-        w_z = (gyro_z/(2.0**15.0))*self.gyro_sens
-        
-        return a_x,a_y,a_z,w_x,w_y,w_z
-    
-    def read_temp(self):
-        temp = self.read_raw_bits(self.TEMP_OUT_H)
-        temp = ((temp - 21.0)/333.87) + 21.0
-        return temp
-
-    def AK8963_start(self):
-        self.bus.write_byte_data(self.AK8963_ADDR,self.AK8963_CNTL,0x00)
-        time.sleep(0.1)
-        self.bus.write_byte_data(self.AK8963_ADDR,self.AK8963_CNTL,0x0F)
-        time.sleep(0.1)
-        coeff_data = self.bus.read_i2c_block_data(self.AK8963_ADDR,self.AK8963_ASAX,3)
-        AK8963_coeffx = (0.5*(coeff_data[0]-128)) / 256.0 + 1.0
-        AK8963_coeffy = (0.5*(coeff_data[1]-128)) / 256.0 + 1.0
-        AK8963_coeffz = (0.5*(coeff_data[2]-128)) / 256.0 + 1.0
-        time.sleep(0.1)
-        self.bus.write_byte_data(self.AK8963_ADDR,self.AK8963_CNTL,0x00)
-        time.sleep(0.1)
-        AK8963_bit_res = 0b0001 # 0b0001 = 16-bit
-        AK8963_samp_rate = 0b0110 # 0b0010 = 8 Hz, 0b0110 = 100 Hz
-        AK8963_mode = (AK8963_bit_res <<4)+AK8963_samp_rate # bit conversion
-        self.bus.write_byte_data(self.AK8963_ADDR, self.AK8963_CNTL, AK8963_mode)
-        time.sleep(0.1)
-        return [AK8963_coeffx,AK8963_coeffy,AK8963_coeffz] 
-    
-    def AK8963_reader(self, register):
-        # read magnetometer values
-        low = self.bus.read_byte_data(self.AK8963_ADDR, register-1)
-        high = self.bus.read_byte_data(self.AK8963_ADDR, register)
-        # combine higha and low for unsigned bit value
-        value = ((high << 8) | low)
-        # convert to +- value
-        if(value > 32768):
-            value -= 65536
-        
-        return value
-
-    def AK8963_conv(self):
-        # raw magnetometer bits
-        while 1:
-    ##        if ((bus.read_byte_data(AK8963_ADDR,AK8963_ST1) & 0x01))!=1:
-    ##            return 0,0,0
-            mag_x = self.AK8963_reader(self.HXH)
-            mag_y = self.AK8963_reader(self.HYH)
-            mag_z = self.AK8963_reader(self.HZH)
-
-            # the next line is needed for AK8963
-            if (self.bus.read_byte_data(self.AK8963_ADDR, self.AK8963_ST2)) & 0x08!=0x08:
-                break
-            
-        #convert to acceleration in g and gyro dps
-    ##    m_x = AK8963_coeffs[0]*(mag_x/(2.0**15.0))*mag_sens
-    ##    m_y = AK8963_coeffs[1]*(mag_y/(2.0**15.0))*mag_sens
-    ##    m_z = AK8963_coeffs[2]*(mag_z/(2.0**15.0))*mag_sens
-        m_x = (mag_x/(2.0**15.0))*self.mag_sens
-        m_y = (mag_y/(2.0**15.0))*self.mag_sens
-        m_z = (mag_z/(2.0**15.0))*self.mag_sens
-        return m_x,m_y,m_z
-    
 
 class imu_talker():
     def __init__(self):
@@ -209,40 +37,46 @@ class imu_talker():
         
         
         self.I = np.eye(3)
-        
-        self.imu_msg = Imu()
+
         self.var_w = np.array([0.067, 0.107, 0.029])
         self.var_f = np.array([1.962, 3.31 , 1.603])
-#<<<<<<< HEAD
-#        self.imu_msg.orientation.x  =  0
-#        self.imu_msg.orientation.y  =  0
-#        self.imu_msg.orientation.z  =  0
-#        self.imu_msg.orientation.w  =  1
-#=======
-#>>>>>>> d338f7ee84a9ba0902962dbfba02da90c46ab192
-        self.imu_msg.angular_velocity_covariance = (self.I * self.var_w).flatten()
-        self.imu_msg.linear_acceleration_covariance = (self.I * self.var_f).flatten()
-        self.imu_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
+        self.var_m = np.array([5.774, 1.119, 1.466])
+        
+        self.imu_msg = Imu()
+        self.telem_imu_msg = telemetry().IMU
+
+        self.raw_msg_init(self.imu_msg)
+        self.raw_msg_init(self.telem_imu_msg)
+        # self.imu_msg.angular_velocity_covariance = (self.I * self.var_w).flatten()
+        # self.imu_msg.linear_acceleration_covariance = (self.I * self.var_f).flatten()
+        # self.imu_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
         
         self.mag_msg = MagneticField()
-        self.var_m = np.array([5.774, 1.119, 1.466])
-        self.mag_msg.magnetic_field_covariance = (self.I * self.var_m).flatten()
-        self.mag_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')        
+        self.telem_mag_msg = telemetry().IMU_mag
+
+        self.mag_msg_init(self.mag_msg)
+        self.mag_msg_init(self.telem_mag_msg)
+
+        # self.mag_msg.magnetic_field_covariance = (self.I * self.var_m).flatten()
+        # self.mag_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')        
         
         self.temp_msg = Temperature()
-        self.temp_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link') 
+        self.telem_temp_msg = telemetry().IMU_temp
+        
+        self.temp_msg_init(self.temp_msg)
+        self.temp_msg_init(self.telem_temp_msg)
+        #self.temp_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link') 
         
         self.seq = 0
         
-#<<<<<<< HEAD
-#        self.pub_raw = rospy.Publisher("/imu_data", Imu, queue_size = 10)
-#        self.pub_mag = rospy.Publisher("imu_data/mag", MagneticField, queue_size = 10)
-#        self.pub_temp = rospy.Publisher("imu_data/temp", Temperature, queue_size = 10)
-#=======
         self.pub_raw = rospy.Publisher("imu/raw", Imu, queue_size = 10)
         self.pub_mag = rospy.Publisher("imu/mag", MagneticField, queue_size = 10)
         self.pub_temp = rospy.Publisher("imu/temp", Temperature, queue_size = 10)
-#>>>>>>> d338f7ee84a9ba0902962dbfba02da90c46ab192
+
+        self.telem_pub_raw = rospy.Publisher("telemetry_chatter", Imu, queue_size = 10)
+        self.telem_pub_mag = rospy.Publisher("telemetry_chatter", MagneticField, queue_size = 10)
+        self.telem_pub_temp = rospy.Publisher("telemetry_chatter", Temperature, queue_size = 10)
+
         self.log_info = ""
         self.loop_rate= rospy.Rate(1)
 
@@ -267,45 +101,68 @@ class imu_talker():
         self.ax,self.ay,self.az,self.gx,self.gy,self.gz,self.mx,self.my,self.mz = mpu_cal
         return mpu_cal
     
-    def talker(self):
+    def read_sensor_data(self):
         try:
             _ = self.calibrated_mpu9250()
+            self.temp = self.imu.read_temp()
         except Exception as e:
             rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
+        
+    def raw_msg_init(self, msg):
+        msg.angular_velocity_covariance = (self.I * self.var_w).flatten()
+        msg.linear_acceleration_covariance = (self.I * self.var_f).flatten()
+        msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
+    
+    def mag_msg_init(self, msg):
+        msg.magnetic_field_covariance = (self.I * self.var_m).flatten()
+        msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
 
-        self.temp = self.imu.read_temp()
-        
+    def temp_msg_init(self, msg):
+        msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
+    
+    def talker_raw(self, msg, pub):   
         #publish imu acceleration and gyro
-        self.imu_msg.header.stamp = rospy.Time.now()
-        self.imu_msg.header.seq = self.seq
-        self.imu_msg.angular_velocity.x  = self.gx
-        self.imu_msg.angular_velocity.y = self.gy
-        self.imu_msg.angular_velocity.z = self.gz
+        msg.header.stamp = rospy.Time.now()
+        msg.header.seq = self.seq
+        msg.angular_velocity.x  = self.gx
+        msg.angular_velocity.y = self.gy
+        msg.angular_velocity.z = self.gz
         
-        self.imu_msg.linear_acceleration.x = self.ax
-        self.imu_msg.linear_acceleration.y = self.ay
-        self.imu_msg.linear_acceleration.z = self.az
-        self.pub_raw.publish(self.imu_msg)
-        
+        msg.linear_acceleration.x = self.ax
+        msg.linear_acceleration.y = self.ay
+        msg.linear_acceleration.z = self.az
+        pub.publish(msg)
+
+    def talker_mag(self, msg, pub):    
         #publish magnetometer
-        self.mag_msg.header.stamp = rospy.Time.now()
-        self.mag_msg.header.seq = self.seq
-        self.mag_msg.magnetic_field.x  = self.mx
-        self.mag_msg.magnetic_field.y = self.my
-        self.mag_msg.magnetic_field.z = self.mz
+        msg.header.stamp = rospy.Time.now()
+        msg.header.seq = self.seq
+        msg.magnetic_field.x  = self.mx
+        msg.magnetic_field.y = self.my
+        msg.magnetic_field.z = self.mz
         
-        self.pub_mag.publish(self.mag_msg)
-        
+        pub.publish(msg)
+    
+    def talker_temp(self, msg, pub):     
         #publish temperature
-        self.temp_msg.header.stamp = rospy.Time.now()
-        self.temp_msg.header.seq = self.seq
-        self.temp_msg.temperature = self.temp
+        msg.header.stamp = rospy.Time.now()
+        msg.header.seq = self.seq
+        msg.temperature = self.temp
         
-        self.pub_temp.publish(self.temp_msg)
+        pub.publish(msg)
         
     def start(self):
         while not rospy.is_shutdown():
-            self.talker()
+            self.read_sensor_data()
+            
+            self.talker_raw(self.imu_msg, self.pub_raw)
+            self.talker_mag(self.mag_msg, self.pub_mag)
+            self.talker_temp(self.temp_msg, self.pub_temp)
+
+            self.talker_raw(self.telem_imu_msg, self.telem_pub_raw)
+            self.talker_mag(self.telem_mag_msg, self.telem_pub_mag)
+            self.talker_temp(self.telem_temp_msg, self.telem_pub_temp)
+            
             self.seq += 1
             self.loop_rate.sleep()
 

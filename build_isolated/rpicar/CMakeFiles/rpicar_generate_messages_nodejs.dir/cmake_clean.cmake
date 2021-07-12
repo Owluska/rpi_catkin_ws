@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/msg/telemetry.js"
   "/home/pi/catkin_ws/devel_isolated/rpicar/share/gennodejs/ros/rpicar/srv/camera.js"
   "CMakeFiles/rpicar_generate_messages_nodejs"
 )

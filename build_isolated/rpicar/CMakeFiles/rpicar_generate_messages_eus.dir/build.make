@@ -53,23 +53,45 @@ CMAKE_BINARY_DIR = /home/pi/catkin_ws/build_isolated/rpicar
 # Include the progress variables for this target.
 include CMakeFiles/rpicar_generate_messages_eus.dir/progress.make
 
+CMakeFiles/rpicar_generate_messages_eus: /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l
 CMakeFiles/rpicar_generate_messages_eus: /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv/camera.l
 CMakeFiles/rpicar_generate_messages_eus: /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/manifest.l
 
+
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/lib/geneus/gen_eus.py
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /home/pi/catkin_ws/src/rpicar/msg/telemetry.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/nav_msgs/msg/Odometry.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/geometry_msgs/msg/Pose.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/sensor_msgs/msg/MagneticField.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/sensor_msgs/msg/Temperature.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/geometry_msgs/msg/TwistWithCovariance.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/geometry_msgs/msg/Vector3.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/sensor_msgs/msg/Range.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/geometry_msgs/msg/PoseWithCovarianceStamped.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/geometry_msgs/msg/PoseWithCovariance.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/std_msgs/msg/Header.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/geometry_msgs/msg/Twist.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/sensor_msgs/msg/Imu.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/sensor_msgs/msg/BatteryState.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/geometry_msgs/msg/Point.msg
+/home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l: /opt/ros/melodic/share/geometry_msgs/msg/Quaternion.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating EusLisp code from rpicar/telemetry.msg"
+	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/pi/catkin_ws/src/rpicar/msg/telemetry.msg -Irpicar:/home/pi/catkin_ws/src/rpicar/msg -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg
 
 /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/lib/geneus/gen_eus.py
 /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv/camera.l: /home/pi/catkin_ws/src/rpicar/srv/camera.srv
 /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/share/sensor_msgs/msg/CameraInfo.msg
 /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/share/sensor_msgs/msg/RegionOfInterest.msg
 /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv/camera.l: /opt/ros/melodic/share/std_msgs/msg/Header.msg
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating EusLisp code from rpicar/camera.srv"
-	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating EusLisp code from rpicar/camera.srv"
+	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/pi/catkin_ws/src/rpicar/srv/camera.srv -Irpicar:/home/pi/catkin_ws/src/rpicar/msg -Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/melodic/share/sensor_msgs/cmake/../msg -Inav_msgs:/opt/ros/melodic/share/nav_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/melodic/share/geometry_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/melodic/share/actionlib_msgs/cmake/../msg -p rpicar -o /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv
 
 /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/manifest.l: /opt/ros/melodic/lib/geneus/gen_eus.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating EusLisp manifest code for rpicar"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build_isolated/rpicar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating EusLisp manifest code for rpicar"
 	catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/melodic/share/geneus/cmake/../../../lib/geneus/gen_eus.py -m -o /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar rpicar std_msgs sensor_msgs nav_msgs
 
 rpicar_generate_messages_eus: CMakeFiles/rpicar_generate_messages_eus
+rpicar_generate_messages_eus: /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/msg/telemetry.l
 rpicar_generate_messages_eus: /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/srv/camera.l
 rpicar_generate_messages_eus: /home/pi/catkin_ws/devel_isolated/rpicar/share/roseus/ros/rpicar/manifest.l
 rpicar_generate_messages_eus: CMakeFiles/rpicar_generate_messages_eus.dir/build.make

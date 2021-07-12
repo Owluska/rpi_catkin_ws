@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "/home/pi/catkin_ws/devel_isolated/rpicar/lib/python2.7/dist-packages/rpicar/msg/__init__.py"
+  "/home/pi/catkin_ws/devel_isolated/rpicar/lib/python2.7/dist-packages/rpicar/msg/_telemetry.py"
   "/home/pi/catkin_ws/devel_isolated/rpicar/lib/python2.7/dist-packages/rpicar/srv/__init__.py"
   "/home/pi/catkin_ws/devel_isolated/rpicar/lib/python2.7/dist-packages/rpicar/srv/_camera.py"
   "CMakeFiles/rpicar_generate_messages_py"

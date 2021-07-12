@@ -324,6 +324,45 @@ download_extra_data/fast:
 .PHONY : download_extra_data/fast
 
 #=============================================================================
+# Target rules for targets named rpicar_geneus
+
+# Build rule for target.
+rpicar_geneus: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 rpicar_geneus
+.PHONY : rpicar_geneus
+
+# fast build rule for target.
+rpicar_geneus/fast:
+	$(MAKE) -f CMakeFiles/rpicar_geneus.dir/build.make CMakeFiles/rpicar_geneus.dir/build
+.PHONY : rpicar_geneus/fast
+
+#=============================================================================
+# Target rules for targets named tests
+
+# Build rule for target.
+tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 tests
+.PHONY : tests
+
+# fast build rule for target.
+tests/fast:
+	$(MAKE) -f CMakeFiles/tests.dir/build.make CMakeFiles/tests.dir/build
+.PHONY : tests/fast
+
+#=============================================================================
+# Target rules for targets named nav_msgs_generate_messages_lisp
+
+# Build rule for target.
+nav_msgs_generate_messages_lisp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 nav_msgs_generate_messages_lisp
+.PHONY : nav_msgs_generate_messages_lisp
+
+# fast build rule for target.
+nav_msgs_generate_messages_lisp/fast:
+	$(MAKE) -f CMakeFiles/nav_msgs_generate_messages_lisp.dir/build.make CMakeFiles/nav_msgs_generate_messages_lisp.dir/build
+.PHONY : nav_msgs_generate_messages_lisp/fast
+
+#=============================================================================
 # Target rules for targets named std_msgs_generate_messages_cpp
 
 # Build rule for target.
@@ -506,6 +545,19 @@ nav_msgs_generate_messages_nodejs/fast:
 .PHONY : nav_msgs_generate_messages_nodejs/fast
 
 #=============================================================================
+# Target rules for targets named _rpicar_generate_messages_check_deps_telemetry
+
+# Build rule for target.
+_rpicar_generate_messages_check_deps_telemetry: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _rpicar_generate_messages_check_deps_telemetry
+.PHONY : _rpicar_generate_messages_check_deps_telemetry
+
+# fast build rule for target.
+_rpicar_generate_messages_check_deps_telemetry/fast:
+	$(MAKE) -f CMakeFiles/_rpicar_generate_messages_check_deps_telemetry.dir/build.make CMakeFiles/_rpicar_generate_messages_check_deps_telemetry.dir/build
+.PHONY : _rpicar_generate_messages_check_deps_telemetry/fast
+
+#=============================================================================
 # Target rules for targets named nav_msgs_generate_messages_cpp
 
 # Build rule for target.
@@ -675,45 +727,6 @@ rpicar_generate_messages/fast:
 .PHONY : rpicar_generate_messages/fast
 
 #=============================================================================
-# Target rules for targets named tests
-
-# Build rule for target.
-tests: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 tests
-.PHONY : tests
-
-# fast build rule for target.
-tests/fast:
-	$(MAKE) -f CMakeFiles/tests.dir/build.make CMakeFiles/tests.dir/build
-.PHONY : tests/fast
-
-#=============================================================================
-# Target rules for targets named nav_msgs_generate_messages_lisp
-
-# Build rule for target.
-nav_msgs_generate_messages_lisp: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 nav_msgs_generate_messages_lisp
-.PHONY : nav_msgs_generate_messages_lisp
-
-# fast build rule for target.
-nav_msgs_generate_messages_lisp/fast:
-	$(MAKE) -f CMakeFiles/nav_msgs_generate_messages_lisp.dir/build.make CMakeFiles/nav_msgs_generate_messages_lisp.dir/build
-.PHONY : nav_msgs_generate_messages_lisp/fast
-
-#=============================================================================
-# Target rules for targets named rpicar_geneus
-
-# Build rule for target.
-rpicar_geneus: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 rpicar_geneus
-.PHONY : rpicar_geneus
-
-# fast build rule for target.
-rpicar_geneus/fast:
-	$(MAKE) -f CMakeFiles/rpicar_geneus.dir/build.make CMakeFiles/rpicar_geneus.dir/build
-.PHONY : rpicar_geneus/fast
-
-#=============================================================================
 # Target rules for targets named gmock_main
 
 # Build rule for target.
@@ -787,6 +800,9 @@ help:
 	@echo "... _rpicar_generate_messages_check_deps_camera"
 	@echo "... sensor_msgs_generate_messages_nodejs"
 	@echo "... download_extra_data"
+	@echo "... rpicar_geneus"
+	@echo "... tests"
+	@echo "... nav_msgs_generate_messages_lisp"
 	@echo "... std_msgs_generate_messages_cpp"
 	@echo "... doxygen"
 	@echo "... geometry_msgs_generate_messages_cpp"
@@ -803,6 +819,7 @@ help:
 	@echo "... nav_msgs_generate_messages_eus"
 	@echo "... run_tests"
 	@echo "... nav_msgs_generate_messages_nodejs"
+	@echo "... _rpicar_generate_messages_check_deps_telemetry"
 	@echo "... nav_msgs_generate_messages_cpp"
 	@echo "... nav_msgs_generate_messages_py"
 	@echo "... rpicar_gencpp"
@@ -817,9 +834,6 @@ help:
 	@echo "... geometry_msgs_generate_messages_lisp"
 	@echo "... actionlib_msgs_generate_messages_py"
 	@echo "... rpicar_generate_messages"
-	@echo "... tests"
-	@echo "... nav_msgs_generate_messages_lisp"
-	@echo "... rpicar_geneus"
 	@echo "... gmock_main"
 	@echo "... gmock"
 	@echo "... gtest_main"

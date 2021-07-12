@@ -8,12 +8,13 @@ from ina219 import INA219
 from time import time, sleep
 from datetime import datetime
 from library.multiplexer import PCA9547
+from rpicar.msg import telemetry
 
 class battery_state_proc():
     def __init__(self, adress = 0x41):
         self.ch = 0
         #self.pca = PCA9547()
-        self.pca.set_channel(self.ch)
+        #self.pca.set_channel(self.ch)
         
         self.ina = None
         self.adress = adress
@@ -25,9 +26,12 @@ class battery_state_proc():
         self.ina = self.setup_ina219(self.adress)
         
         self.pub = rospy.Publisher("battery_state", BatteryState, queue_size = 10)
+        self.msg_pub = rospy.Publisher("telemetry_chatter", BatteryState, queue_size = 10)
+        self.msg = telemetry()
         #self.sub = rospy.Subscriber("battery_state", BatteryState, self.callback, queue_size = 10)
         
         self.bs = self.battery_init()
+        self.msg.Battery = self.battery_init()
         #self.pub.publish(self.bs)
         
         self.log_info = ""
@@ -77,21 +81,21 @@ class battery_state_proc():
         
 
             
-    def battery_talker(self):
+    def battery_talker(self, pub, bs):
         self.voltage, self.current = self.measure()
 
         if self.voltage != None and self.current != None:
-            self.bs.header.stamp = rospy.Time.now()
-            self.bs.voltage = self.voltage
-            self.bs.current = self.current
-            self.bs.cell_voltage = [self.voltage/2 for c in self.bs.cell_voltage]
+            bs.header.stamp = rospy.Time.now()
+            bs.voltage = self.voltage
+            bs.current = self.current
+            bs.cell_voltage = [self.voltage/2 for c in self.bs.cell_voltage]
             bs.present = True
             #self.log_info = "Battery state %, %".format(self.voltage, self.current)
             
         else:
             self.ina = self.setup_ina219(self.adress)
         
-        self.pub.publish(self.bs)
+        pub.publish(bs)
 #     def callback(self, msg): 
 #         if msg.voltage < 6.4:
 #             self.log_info = "Undervoltage"
@@ -104,7 +108,8 @@ class battery_state_proc():
         
     def start(self):
         while not rospy.is_shutdown():
-            self.battery_talker() 
+            self.battery_talker(self.pub, self.bs)         
+            self.battery_talker(self.msg_pub, self.msg.Battery)  
             #rospy.loginfo(self.log_info)
             self.seq += 1
             self.loop_rate.sleep()

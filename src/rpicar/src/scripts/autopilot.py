@@ -1,14 +1,13 @@
 #! /usr/bin/env python3
-
-import wiringpi
-import roslib
 import rospy
+
 from sensor_msgs.msg import Range, BatteryState
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from library.motors import PCA9685, car_movement_PCA9685
-import message_filters
+from message_filters import TimeSynchronizer, Subscriber
 
+from time import sleep
 class us_mvmnt():
     min_voltage = 6.5
     # RUL = 12
@@ -20,23 +19,28 @@ class us_mvmnt():
     # RUL_LEFT = 100
     
     def __init__(self, US1_topic, US2_topic):
-        self.pca = PCA9685(0x41)
-        self.car = car_movement_PCA9685(self.pca)
+        #self.pca = PCA9685(0x41)
+        self.car = car_movement_PCA9685(PCA9685(0x41))
         
         self.CENTER = self.car.CENTER_DEGREE
         self.RIGHT = self.car.MIN_DEGREE
         self.LEFT = self.car.MAX_DEGREE
 
-        self.MAX_SPEED = self.car.MAX_SPEED
+        self.MAX_SPEED = 100
         self.SPEED = int(self.MAX_SPEED * 0.75)
 
-        self.us1_sub = rospy.Subscriber(US1_topic, Range, self.us1_callback, queue_size = 10)
-        self.us2_sub = rospy.Subscriber(US2_topic, Range, self.us2_callback, queue_size = 10)
-        self.bat_sub = rospy.Subscriber("battery_state", BatteryState, self.bat_callback, queue_size = 10)
-        #self.odom_sub = rospy.Subscriber("robot_pose_ekf/odom_combined", PoseWithCovarianceStamped, self.pos_callback, queue_size = 10)
-        self.odom_sub = rospy.Subscriber("vo", Odometry, self.odom_callback, queue_size = 10)
-        self.topics = [self.us1_sub, self.us2_sub, self.bat_sub, self.odom_sub]
-        self.ts = message_filters.TimeSynchronizer(self.topics, 10)
+        # self.us1_sub = Subscriber(US1_topic, Range)
+        # self.us2_sub = Subscriber(US2_topic, Range)
+        #self.bat_sub = Subscriber("battery_state", BatteryState)
+        #self.odom_sub = Subscriber("robot_pose_ekf/odom_combined", PoseWithCovarianceStamped)
+        #self.vo_sub = Subscriber("vo", Odometry)
+        #self.topics = [self.us1_sub, self.us2_sub, self.vo_sub]
+        #self.topics = [self.us1_sub, self.us2_sub]
+        
+        #self.ts = TimeSynchronizer((self.topics), 10)
+        #self.ts.registerCallback(self.callback)
+ 
+        self.us1_sub = rospy.Subscriber(US1_topic, Range, self.us1_callback)
         self.state_status = ""
         self.loop_rate = rospy.Rate(0.1)
         
@@ -50,33 +54,38 @@ class us_mvmnt():
         self.loop_rate= rospy.Rate(1)
         #self.car_init()
     
+    def callback(self, us1_msg, us2_msg, bat_msg, odom_msg, vo_msg):
+        #print("Smth")
+        self.range_value1 = us1_msg.range
+        self.range_value2 = us2_msg.range
+    
     def us1_callback(self, msg):
         print("US1")
         self.range_value1 = msg.range
         if msg.range <= msg.min_range:
             self.state_status = "Obastcale"
-    
-    def us2_callback(self, msg):
-        print("US2")
-        self.range_value2 = msg.range
-        if msg.range <= msg.min_range:
-            self.state_status = "Obastcale"
-            
-    def bat_callback(self, msg):
-        self.battery_voltage = msg.voltage
-        if msg.voltage <= self.min_voltage:
-            self.state_status = "Undervoltage"
-    
-    def pos_callback(self, msg):
-        print("pos")
-        self.point[0] = msg.pose.pose.position.x
-        self.point[1] = msg.pose.pose.position.y
-        self.point[2] = msg.pose.pose.position.z
-        
-        self.quaternion[3] = msg.pose.pose.orientation.w
-
-    def odom_callback(self, msg):
-        print("Got odom")       
+#     
+#     def us2_callback(self, msg):
+#         print("US2")
+#         self.range_value2 = msg.range
+#         if msg.range <= msg.min_range:
+#             self.state_status = "Obastcale"
+#             
+#     def bat_callback(self, msg):
+#         self.battery_voltage = msg.voltage
+#         if msg.voltage <= self.min_voltage:
+#             self.state_status = "Undervoltage"
+#     
+#     def pos_callback(self, msg):
+#         print("pos")
+#         self.point[0] = msg.pose.pose.position.x
+#         self.point[1] = msg.pose.pose.position.y
+#         self.point[2] = msg.pose.pose.position.z
+#         
+#         self.quaternion[3] = msg.pose.pose.orientation.w
+# 
+#     def odom_callback(self, msg):
+#         print("Got odom")       
     
     def random_movement(self):       
         if self.state_status == "Undervoltage":
@@ -99,21 +108,25 @@ class us_mvmnt():
     
     def loop(self):
         while not rospy.is_shutdown():
-            self.random_movement() 
-            self.loop_rate.sleep()
-            print("{} s, {} m, ".format(rospy.Time, self.point, self.quaternion))
-            self.loop_rate.sleep()
+            self.random_movement()
+            # self.car.turn(self.CENTER)
+            # self.car.move_backward(self.SPEED)  
+            sleep(1)
+            print("{} s, {} m, ".format(rospy.Time, self.range_value1, self.range_value2))
+
         self.car.stop_all()
         self.car.turn(self.CENTER)
             
         
 def main():
+    #print('car_us_movement')
     rospy.init_node('car_us_movement', anonymous = True)
+    
     US1 = str(rospy.get_param('~US1_topic', default="US1_data"))
     US2 = str(rospy.get_param('~US2_topic', default="US2_data"))
-    print(US1, US2)
+    #print(US1, US2)
     m = us_mvmnt(US1, US2)
-    #m.loop()
+    m.loop()
 
 
 if __name__ == '__main__':

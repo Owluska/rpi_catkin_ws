@@ -10,6 +10,7 @@ from datetime import datetime
 
 import wiringpi
 from time import time, sleep
+from rpicar.msg import telemetry
 
 class US:
     def __init__(self, trig = 24, echo = 23):
@@ -77,40 +78,55 @@ class US_talker():
         #self.sub = rospy.Subscriber("back_range", Range, self.callback, queue_size = 10)
         
         self.range_msg = Range()
-        self.range_msg.radiation_type = 0
-        # 15 deg = 0.261799 rad
-        self.range_msg.field_of_view = 0.261799
-        self.range_msg.min_range = 0.02
-        self.range_msg.max_range = 4.0
-        self.range_msg.range = 0.0
+        self.init_msg(self.range_msg)
+
+
         self.range_msg.header.frame_id = rospy.get_param('~frame_id', 'us_link')
         
         self.range_pub = rospy.Publisher(self.pub_name, Range, queue_size = 10)
+
+        self.msg_pub = rospy.Publisher("telemetry_chatter", Range, queue_size = 10)
+        self.msg = telemetry().US1
+    
+        if self.US_label == 2:
+            self.msg = telemetry().US2
+
+        
+        self.init_msg(self.msg)          
+
         self.log_info = ""
         self.loop_rate= rospy.Rate(1)
         
         
         self.seq = 0
 
-            
-    def range_talker(self):
-        self.range_msg.header.stamp = rospy.Time.now()
+    def init_msg(self, msg):
+        msg.radiation_type = 0
+        # 15 deg = 0.261799 rad
+        msg.field_of_view = 0.261799
+        msg.min_range = 0.02
+        msg.max_range = 4.0
+        msg.range = 0.0
+    
+    def range_talker(self, pub, msg):
+        msg.header.stamp = rospy.Time.now()
         try:
-            self.range_msg.range = self.US.get_distance() * 1e-2
+            msg.range = self.US.get_distance() * 1e-2
         except Exception as e:
             if self.US.get_distance() == None:
                 rospy.loginfo("Error connecting to US{}".format(self.US_label))
             else:
                 rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
 
-        self.range_msg.header.seq = self.seq
-        self.range_pub.publish(self.range_msg)
+        msg.header.seq = self.seq
+        pub.publish(msg)
         #self.log_info = "Back distance from US#{:s}, {:.2f} [m]".format(self.US_label, self.data)   
         rospy.sleep(1)
           
     def start(self):
         while not rospy.is_shutdown():
-            self.range_talker() 
+            self.range_talker(self.range_pub, self.range_msg)
+            self.range_talker(self.msg_pub, self.msg) 
             #rospy.loginfo(self.log_info)
             self.seq += 1
             self.loop_rate.sleep()

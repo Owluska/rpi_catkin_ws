@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/camera.h"
+  "/home/pi/catkin_ws/devel_isolated/rpicar/include/rpicar/telemetry.h"
   "CMakeFiles/rpicar_generate_messages_cpp"
 )
 

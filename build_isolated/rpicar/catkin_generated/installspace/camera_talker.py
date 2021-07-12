@@ -26,7 +26,7 @@ class usb_cam_talker():
     
     def __init__(self, camera):
         self.camera = camera
-        self.camera_name = "/usb_camera/"
+        self.camera_name = "/usb_camera"
         #print(self.camera)
         self.cap = cv2.VideoCapture(self.camera) 
         #self.bridge = CvBridge()
@@ -37,8 +37,8 @@ class usb_cam_talker():
         self.cam_raw_msg.is_bigendian = 1
         self.cam_info_msg = CameraInfo()
         
-        self.pub_cam_raw = rospy.Publisher(self.camera_name+"image_raw", Image, queue_size = 10)
-        self.pub_cam_info = rospy.Publisher(self.camera_name+"camera_info", CameraInfo, queue_size = 10)
+        self.pub_cam_raw = rospy.Publisher(self.camera_name+"/image_raw", Image, queue_size = 10)
+        self.pub_cam_info = rospy.Publisher(self.camera_name+"/camera_info", CameraInfo, queue_size = 10)
         self.log_info = ""
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
         self.loop_rate= rospy.Rate(self.fps)
@@ -58,8 +58,6 @@ class usb_cam_talker():
                 self.cam_raw_msg.height = self.height
                 self.cam_raw_msg.width = self.width
 
-
-                
                 #publish camera info
                 self.cam_info_msg.header.stamp = time
                 self.cam_info_msg.header.seq = self.seq

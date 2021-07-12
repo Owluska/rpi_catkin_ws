@@ -116,7 +116,7 @@ class PCA9685(object):
     
 class car_movement_PCA9685():
     FREQUENCY = 50
-    MAX_SPEED = 4096
+    MAX_SPEED = 4095
     MIN_SPEED = 0
 
     MAX_DEGREE = 140
@@ -169,7 +169,7 @@ class car_movement_PCA9685():
   
  
     def turn(self, degree):
-        print(degree)
+        #print(degree)
         if degree < self.MIN_DEGREE or degree > self.MAX_DEGREE:
             degree = self.CENTER_DEGREE
         MIN_WIDTH = 0.02 * self.MAX_SPEED
