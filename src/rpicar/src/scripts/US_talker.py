@@ -33,15 +33,26 @@ class US_talker():
         self.range_msg.header.frame_id = rospy.get_param('~frame_id', 'us_link')
         
         self.range_pub = rospy.Publisher(self.pub_name, Range, queue_size = 10)
-
+        self.telem_sub = rospy.Subscriber("telemetry_chatter", telemetry, self.callback)
         self.telem_pub = rospy.Publisher("telemetry_chatter", telemetry, queue_size = 10)
         
         self.log_info = ""
-        self.loop_rate= rospy.Rate(1)
+        self.loop_rate= rospy.Rate(0.05)
         
         
         self.seq = 0
 
+    def callback(self, msg):
+        #print("h")
+        self.telem_msg = msg
+
+        # if self.US_label == "1":  
+        #     self.range_talker(self.telem_msg.US1)
+        # elif self.US_label == "2":
+        #     self.range_talker(self.telem_msg.US2)                      
+        # self.telem_pub.publish(self.telem_msg)
+
+    
     def init_msg(self, msg):
         msg.radiation_type = 0
         # 15 deg = 0.261799 rad
@@ -66,6 +77,7 @@ class US_talker():
         
           
     def start(self):
+        self.telem_pub.publish(self.telem_msg)
         while not rospy.is_shutdown():
             self.range_talker(self.range_msg)
             self.range_pub.publish(self.range_msg)
