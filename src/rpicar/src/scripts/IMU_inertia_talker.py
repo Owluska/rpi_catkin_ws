@@ -1,15 +1,14 @@
 #! /usr/bin/env python3
-import roslib
 import rospy
 import sys
-from sensor_msgs.msg import Imu, Temperature, MagneticField
-from std_msgs.msg import Float32
+from sensor_msgs.msg import Imu
+
 
 from library.mpu9250_lib import mpu9250
 from rpicar.msg import telemetry
 import numpy as np
 
-class imu_talker():
+class inertia_talker():
     def __init__(self):
         self.offsets = np.array([[0.9964611434970413, -0.1358959565043638],
                                      [0.998331379179552,0.06877502271143854],
@@ -40,42 +39,19 @@ class imu_talker():
 
         self.var_w = np.array([0.067, 0.107, 0.029])
         self.var_f = np.array([1.962, 3.31 , 1.603])
-        self.var_m = np.array([5.774, 1.119, 1.466])
         
         self.imu_msg = Imu()
         self.telem_imu_msg = telemetry().IMU
 
         self.raw_msg_init(self.imu_msg)
         self.raw_msg_init(self.telem_imu_msg)
-        # self.imu_msg.angular_velocity_covariance = (self.I * self.var_w).flatten()
-        # self.imu_msg.linear_acceleration_covariance = (self.I * self.var_f).flatten()
-        # self.imu_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
-        
-        self.mag_msg = MagneticField()
-        self.telem_mag_msg = telemetry().IMU_mag
-
-        self.mag_msg_init(self.mag_msg)
-        self.mag_msg_init(self.telem_mag_msg)
-
-        # self.mag_msg.magnetic_field_covariance = (self.I * self.var_m).flatten()
-        # self.mag_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')        
-        
-        self.temp_msg = Temperature()
-        self.telem_temp_msg = telemetry().IMU_temp
-        
-        self.temp_msg_init(self.temp_msg)
-        self.temp_msg_init(self.telem_temp_msg)
-        #self.temp_msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link') 
+       
+    
         
         self.seq = 0
         
-        self.pub_raw = rospy.Publisher("imu/raw", Imu, queue_size = 10)
-        self.pub_mag = rospy.Publisher("imu/mag", MagneticField, queue_size = 10)
-        self.pub_temp = rospy.Publisher("imu/temp", Temperature, queue_size = 10)
-
-        self.telem_pub_raw = rospy.Publisher("telemetry_chatter", Imu, queue_size = 10)
-        self.telem_pub_mag = rospy.Publisher("telemetry_chatter", MagneticField, queue_size = 10)
-        self.telem_pub_temp = rospy.Publisher("telemetry_chatter", Temperature, queue_size = 10)
+        self.pub_inertia = rospy.Publisher("imu/raw", Imu, queue_size = 10)
+        self.telem_pub_inertia = rospy.Publisher("telemetry_chatter", Imu, queue_size = 10)
 
         self.log_info = ""
         self.loop_rate= rospy.Rate(1)
@@ -104,7 +80,6 @@ class imu_talker():
     def read_sensor_data(self):
         try:
             _ = self.calibrated_mpu9250()
-            self.temp = self.imu.read_temp()
         except Exception as e:
             rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
         
@@ -113,12 +88,6 @@ class imu_talker():
         msg.linear_acceleration_covariance = (self.I * self.var_f).flatten()
         msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
     
-    def mag_msg_init(self, msg):
-        msg.magnetic_field_covariance = (self.I * self.var_m).flatten()
-        msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
-
-    def temp_msg_init(self, msg):
-        msg.header.frame_id = rospy.get_param('~frame_id', 'imu_link')
     
     def talker_raw(self, msg, pub):   
         #publish imu acceleration and gyro
@@ -133,49 +102,24 @@ class imu_talker():
         msg.linear_acceleration.z = self.az
         pub.publish(msg)
 
-    def talker_mag(self, msg, pub):    
-        #publish magnetometer
-        msg.header.stamp = rospy.Time.now()
-        msg.header.seq = self.seq
-        msg.magnetic_field.x  = self.mx
-        msg.magnetic_field.y = self.my
-        msg.magnetic_field.z = self.mz
-        
-        pub.publish(msg)
-    
-    def talker_temp(self, msg, pub):     
-        #publish temperature
-        msg.header.stamp = rospy.Time.now()
-        msg.header.seq = self.seq
-        msg.temperature = self.temp
-        
-        pub.publish(msg)
         
     def start(self):
         while not rospy.is_shutdown():
             self.read_sensor_data()
             
-            self.talker_raw(self.imu_msg, self.pub_raw)
-            self.talker_mag(self.mag_msg, self.pub_mag)
-            self.talker_temp(self.temp_msg, self.pub_temp)
-
-            self.talker_raw(self.telem_imu_msg, self.telem_pub_raw)
-            self.talker_mag(self.telem_mag_msg, self.telem_pub_mag)
-            self.talker_temp(self.telem_temp_msg, self.telem_pub_temp)
+            self.talker_raw(self.imu_msg, self.pub_inertia)
+            self.talker_raw(self.telem_imu_msg, self.telem_pub_inertia)
             
             self.seq += 1
             self.loop_rate.sleep()
 
 def main(args):
     rospy.init_node('imu_talker', anonymous = True)   
-    talker = imu_talker()
+    talker = inertia_talker()
     talker.start()    
 
 
 if __name__ == '__main__':
     main(sys.argv) 
 
-#---------debugging content
-# talker = imu_talker()
-# print(talker.calibrated_mpu9250())
 

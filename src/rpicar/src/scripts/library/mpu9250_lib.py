@@ -62,7 +62,7 @@ class mpu9250:
         self.bus.write_byte_data(self.MPU6050_ADDR, self.GYRO_CONFIG, int(gyro_config_sel[gyro_indx]))
         time.sleep(0.1)
         #Write to Accel configuration register
-        accel_config_sel = [0b00000,0b01000,0b10000,0b11000] # byte registers
+        accel_config_sel = [0b00000, 0b01000, 0b10000, 0b11000] # byte registers
         accel_config_vals = [2.0,4.0,8.0,16.0] # g (g = 9.81 m/s^2)
         accel_indx = 0
         self.bus.write_byte_data(self.MPU6050_ADDR, self.ACCEL_CONFIG, int(accel_config_sel[accel_indx]))

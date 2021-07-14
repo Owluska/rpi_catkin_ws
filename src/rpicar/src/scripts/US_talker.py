@@ -1,69 +1,12 @@
 #! /usr/bin/env python3
 
-import roslib
 import rospy
 import sys
 from sensor_msgs.msg import Range
-from std_msgs.msg import Float32
 
-from datetime import datetime
-
-import wiringpi
-from time import time, sleep
 from rpicar.msg import telemetry
+from library.US_lib import US
 
-class US:
-    def __init__(self, trig = 24, echo = 23):
-        self.US = None
-        self.US_TRIG = trig
-        self.US_ECHO = echo
-        self.T = 25
-        self.sound_vel=(331.5+0.6*self.T)
-        self.us = 1e-6
-        self.ms = 1e-3
-        self.timeout = 10 * self.ms
-        self.dist = None        
-
-    def setup_US_ports(self):
-        wiringpi.wiringPiSetupGpio()
-        wiringpi.pinMode(self.US_ECHO, wiringpi.GPIO.INPUT)
-    
-        wiringpi.pinMode(self.US_TRIG, wiringpi.GPIO.OUTPUT)
-        wiringpi.digitalWrite(self.US_TRIG, wiringpi.GPIO.LOW)
-
-    def get_distance(self):
-        sleep(0.38)
-        pulse_start = 0
-        pulse_end = 0
-        
-        wiringpi.digitalWrite(self.US_TRIG, wiringpi.GPIO.LOW)
-        sleep(0.05)
-        
-        wiringpi.digitalWrite(self.US_TRIG, wiringpi.GPIO.HIGH)
-        sleep(10*self.us)
-        wiringpi.digitalWrite(self.US_TRIG, wiringpi.GPIO.LOW)
-        
-        start_time = time()
-        while(wiringpi.digitalRead(self.US_ECHO) == wiringpi.GPIO.LOW):
-            pulse_start = time()
-            if(pulse_start - start_time > self.timeout):
-                break
-            
-        start_time = time()
-        while(wiringpi.digitalRead(self.US_ECHO) == wiringpi.GPIO.HIGH):
-            pulse_end = time()
-            if(pulse_end - start_time > self.timeout):
-                break
-        
-     
-        distance = self.sound_vel * (pulse_end - pulse_start) *0.5*100
-        distance = abs(round(distance, 2))
-        
-        if distance < 0 or distance > self.sound_vel * (self.timeout) * 100:
-                distance = None            
-        self.dist = distance
-        #in cm
-        return distance 
 
 class US_talker():
     def __init__(self, US, US_label):
@@ -72,28 +15,27 @@ class US_talker():
         
         self.US_label = US_label
         self.pub_name = "US{:s}_data".format(self.US_label)
-        
+        #print(self.US_label)
 #         self.pub = rospy.Publisher(self.pub_name, Float32, queue_size = 10)
 #         self.data = 0.0
         #self.sub = rospy.Subscriber("back_range", Range, self.callback, queue_size = 10)
         
         self.range_msg = Range()
         self.init_msg(self.range_msg)
+        
+        self.telem_msg = telemetry()
 
+        if US_label == "1":
+            self.init_msg(self.telem_msg.US1)
+        elif US_label == "2":
+            self.init_msg(self.telem_msg.US2)
 
         self.range_msg.header.frame_id = rospy.get_param('~frame_id', 'us_link')
         
         self.range_pub = rospy.Publisher(self.pub_name, Range, queue_size = 10)
 
-        self.msg_pub = rospy.Publisher("telemetry_chatter", Range, queue_size = 10)
-        self.msg = telemetry().US1
-    
-        if self.US_label == 2:
-            self.msg = telemetry().US2
-
+        self.telem_pub = rospy.Publisher("telemetry_chatter", telemetry, queue_size = 10)
         
-        self.init_msg(self.msg)          
-
         self.log_info = ""
         self.loop_rate= rospy.Rate(1)
         
@@ -108,7 +50,7 @@ class US_talker():
         msg.max_range = 4.0
         msg.range = 0.0
     
-    def range_talker(self, pub, msg):
+    def range_talker(self, msg):
         msg.header.stamp = rospy.Time.now()
         try:
             msg.range = self.US.get_distance() * 1e-2
@@ -119,14 +61,21 @@ class US_talker():
                 rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
 
         msg.header.seq = self.seq
-        pub.publish(msg)
+        #pub.publish(msg)
         #self.log_info = "Back distance from US#{:s}, {:.2f} [m]".format(self.US_label, self.data)   
-        rospy.sleep(1)
+        
           
     def start(self):
         while not rospy.is_shutdown():
-            self.range_talker(self.range_pub, self.range_msg)
-            self.range_talker(self.msg_pub, self.msg) 
+            self.range_talker(self.range_msg)
+            self.range_pub.publish(self.range_msg)
+            
+            if self.US_label == "1":  
+                self.range_talker(self.telem_msg.US1)
+            elif self.US_label == "2":
+                self.range_talker(self.telem_msg.US2)           
+            
+            self.telem_pub.publish(self.telem_msg)
             #rospy.loginfo(self.log_info)
             self.seq += 1
             self.loop_rate.sleep()
