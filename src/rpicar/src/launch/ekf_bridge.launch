@@ -2,6 +2,14 @@
   <!-- battery, IMU & US drivers for ROS -->
   <!-- <node pkg="rpicar" type="battery_talker.py" name="battery"/> -->
 	<node pkg="rpicar" type="IMU_inertia_talker.py" name="imu"/> 
+  <node pkg="rpicar" type="IMU_mag_talker.py" name="mag"/>
+  <node pkg="rpicar" type="IMU_temp_talker.py" name="imu_temp"/>
+  <node pkg="rpicar" type="US_talker.py" name="US1">
+       <param name="US_number" value="1"/>
+  </node>
+  <node pkg="rpicar" type="US_talker.py" name="US2">
+       <param name="US_number" value="2"/>
+  </node>  
   <!-- Run usb camera driver -->
   <node pkg="rpicar" type="camera_talker.py" name="camera"/>
   <!--Run vo camera bridge -->
@@ -39,6 +47,8 @@
 		<remap from="odom" to="pr2_base_odometry/odom"/>
     <!-- <remap from="/robot_pose_ekf/odom_combined" to="/telemetry_chatter/EKF_pose"/> -->
    </node>
-   <node pkg="rpicar" type="EKF_pose_telem_talker.py" name="ekf_bridge"/> 
+   <node pkg="rpicar" type="EKF_pose_telem_talker.py" name="ekf_bridge"/>
+   <node pkg="rpicar" type="vo_bridge.py" name="vo_bridge"/> 
+   <node pkg="rpicar" type="autopilot.py" name="auto"/> 
 </launch>
 
