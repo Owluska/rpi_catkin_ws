@@ -6,12 +6,13 @@ import rospy
 # from geometry_msgs.msg import PoseWithCovarianceStamped
 from library.motors import PCA9685, car_movement_PCA9685
 from rpicar.msg import telemetry
+
 # from message_filters import TimeSynchronizer, Subscriber
 
 from time import sleep
 class us_mvmnt():
     min_voltage = 6.5
-    min_range = 0.05
+    min_range = 0.1
     def __init__(self, US1_topic, US2_topic):
         #self.pca = PCA9685(0x41)
         self.car = car_movement_PCA9685(PCA9685(0x41))
@@ -31,8 +32,8 @@ class us_mvmnt():
         self.loop_rate = rospy.Rate(0.1)
         
         self.battery_voltage = 0.0
-        self.range_value1 = 0.0
-        self.range_value2 = 0.0
+        self.range_value1 = None
+        self.range_value2 = None
         self.min_range = 0.02
 
         self.vo_px = None
@@ -47,8 +48,9 @@ class us_mvmnt():
         # self.point = [0, 0, 0]
         # self.quaternion = [0, 0, 0, 1]
 
-        self.loop_rate= rospy.Rate(1)
-        self.time_secs = rospy.get_time()
+        self.loop_rate = rospy.Rate(0.05)
+        self.time_secs = 0
+        self.dt = rospy.get_time()
         #self.car_init()
     
 
@@ -68,6 +70,13 @@ class us_mvmnt():
         # self.vo_pose = msg.VO.pose.pose.position
         # self.vo_quat = msg.VO.pose.pose.orientation
 
+    def get_telemetry(self):
+        try:
+            self.range_value1 = rospy.get_param('US1_data')
+            self.range_value2 = rospy.get_param('US2_data')
+        except Exception:
+            pass
+    
     def obstacles_state_computing(self):
         if self.range_value1 <= self.min_range or self.range_value1 <= self.min_range:
             self.state_status == "Obastcale"
@@ -94,13 +103,20 @@ class us_mvmnt():
     def loop(self):
         while not rospy.is_shutdown():
             #self.random_movement()
-            # self.car.turn(self.CENTER)
-            # self.car.move_backward(self.SPEED)  
-            self.time_secs = rospy.get_time() - self.time_secs
-            if self.time_secs % 1 == 0:
-                rospy.loginfo("t:{:.2f}[s] ob1:{:.2f}[m] ob2:{:.2f}[m] px:{:.2f} py:{:.2f} pz{:.2f}".format(
-                    self.time_secs, self.range_value1, self.range_value2, self.vo_px, self.vo_py, self.vo_pz))
-
+            self.dt = rospy.get_time() - self.dt
+            self.time_secs += self.dt
+            self.get_telemetry()
+            
+            try:
+                rospy.loginfo("t:{:.2f}[s] ob1:{:.2f}[m] ob2:{:.2f}[m]".format(
+                        self.time_secs, self.range_value1, self.range_value2))
+            except Exception as e:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(e).__name__, e.args)
+                rospy.loginfo(message)
+            self.dt = rospy.get_time()
+            sleep(0.1)
+            #self.loop_rate.sleep()
         self.car.stop_all()
         self.car.turn(self.CENTER)
             

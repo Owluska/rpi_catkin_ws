@@ -1,54 +1,10 @@
 <launch>
-  <!-- battery, IMU & US drivers for ROS -->
-  <!-- <node pkg="rpicar" type="battery_talker.py" name="battery"/> -->
-	<node pkg="rpicar" type="IMU_inertia_talker.py" name="imu"/> 
-  <!-- <node pkg="rpicar" type="IMU_mag_talker.py" name="mag"/>
-  <node pkg="rpicar" type="IMU_temp_talker.py" name="imu_temp"/> -->
   <node pkg="rpicar" type="US_talker.py" name="US1">
        <param name="US_number" value="1"/>
   </node>
   <node pkg="rpicar" type="US_talker.py" name="US2">
        <param name="US_number" value="2"/>
-  </node>  
-  <!-- Run usb camera driver -->
-  <node pkg="rpicar" type="camera_talker.py" name="camera"/>
-  <!--Run vo camera bridge -->
-  <node pkg="rpicar" type="vo_covariance_talker.py" name="vo_cov_talker"/>  
-  <!-- Set usb camera topics name -->
-  <arg name="camera" default="/usb_camera"/>
-  <!-- Run the mono image proc -->
-  <node ns="$(arg camera)" pkg="image_proc" type="image_proc" name="image_proc" />
-  <!-- Viso2 -->
-  <node pkg="viso2_ros" type="mono_odometer" name="mono_odometer">
-    <remap from="image" to="$(arg camera)/image_rect"/>
-    <param name="base_link_frame_id" value="$(arg camera)"/>
-
-    <param name="camera_height" value="1.0" />
-    <param name="camera_pitch"  value="0.0" />
-  </node>
-  <!-- <node pkg="tf" type="static_transform_publisher" name="usb_camera_link_broadcaster" args="1 0 0 0 0 0 1 usb_camera/ usb_camera 100" /> -->
-  <!-- Start static transfrom publisher-->
-  <!-- static_transfrom_publisher x y z qx qy qz qw frame_id child_frame_id period_in_ms-->
-  <node pkg="tf" type="static_transform_publisher" name="usb_camera_link_broadcaster" args = "0.18 0.05 0.05 0 0 0 1 $(arg camera) /usb_camera/ 100"/>
-  <!-- Set parameters for EKF -->
-  <rosparam param="imu0_config"> [true,true,false,false,false,true,true,true,false,false,false,true,true,true,true] </rosparam>
-  <!-- Run the EKF -->
-  <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
-                <param name="output_frame" value="odom_combined"/>
-		<param name="base_footprint_frame" value="base_footprint"/>
-		<param name="freq" value="30.0"/>
-		<param name="sensor_timeout" value="1.0"/>  
-		<param name="odom_used" value="false"/>
-		<param name="imu_used" value="true"/>
-		<param name="vo_used" value="true"/>
-
-		<param name="imu0" value="/imu_data"/>
-		<!--remap from="vo" to="mono_odometer/odometry"/-->
-		<remap from="odom" to="pr2_base_odometry/odom"/>
-    <!-- <remap from="/robot_pose_ekf/odom_combined" to="/telemetry_chatter/EKF_pose"/> -->
-   </node>
-   <node pkg="rpicar" type="EKF_pose_telem_talker.py" name="ekf_bridge"/>
-   <node pkg="rpicar" type="vo_bridge.py" name="vo_bridge"/> 
-   <node pkg="rpicar" type="autopilot.py" name="auto"/> 
+  </node>   
+  <node pkg="rpicar" type="autopilot.py" name="auto"/> 
 </launch>
 
