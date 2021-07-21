@@ -1,22 +1,16 @@
 #! /usr/bin/env python3
 import rospy
 
-from sensor_msgs.msg import Range, BatteryState
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseWithCovarianceStamped
+# from sensor_msgs.msg import Range, BatteryState
+# from nav_msgs.msg import Odometry
+# from geometry_msgs.msg import PoseWithCovarianceStamped
 from library.motors import PCA9685, car_movement_PCA9685
-from message_filters import TimeSynchronizer, Subscriber
+from rpicar.msg import telemetry
+# from message_filters import TimeSynchronizer, Subscriber
 
 from time import sleep
 class us_mvmnt():
     min_voltage = 6.5
-    # RUL = 12
-    # MOTOR_A = 6
-    # MOTOR_B = 26
-    
-    # RUL_CENTER = 150
-    # RUL_RIGHT = 200
-    # RUL_LEFT = 100
     
     def __init__(self, US1_topic, US2_topic):
         #self.pca = PCA9685(0x41)
@@ -29,18 +23,10 @@ class us_mvmnt():
         self.MAX_SPEED = 100
         self.SPEED = int(self.MAX_SPEED * 0.75)
 
-        # self.us1_sub = Subscriber(US1_topic, Range)
-        # self.us2_sub = Subscriber(US2_topic, Range)
-        #self.bat_sub = Subscriber("battery_state", BatteryState)
-        #self.odom_sub = Subscriber("robot_pose_ekf/odom_combined", PoseWithCovarianceStamped)
-        #self.vo_sub = Subscriber("vo", Odometry)
-        #self.topics = [self.us1_sub, self.us2_sub, self.vo_sub]
-        #self.topics = [self.us1_sub, self.us2_sub]
+
+        self.telem_msg = telemetry()
+        self.telem_sub = rospy.Subscriber("telemetry_chatter", telemetry, self.callback)
         
-        #self.ts = TimeSynchronizer((self.topics), 10)
-        #self.ts.registerCallback(self.callback)
- 
-        self.us1_sub = rospy.Subscriber(US1_topic, Range, self.us1_callback)
         self.state_status = ""
         self.loop_rate = rospy.Rate(0.1)
         
@@ -48,44 +34,25 @@ class us_mvmnt():
         self.range_value1 = 0.0
         self.range_value2 = 0.0
         self.min_range = 0.02
-        self.point = [0, 0, 0]
-        self.quaternion = [0, 0, 0, 1]
+
+        self.vo_pose = [0, 0, 0]
+        self.vo_quat = [0, 0, 0, 1]
+        
+        # self.point = [0, 0, 0]
+        # self.quaternion = [0, 0, 0, 1]
 
         self.loop_rate= rospy.Rate(1)
+        self.time_secs = rospy.get_time()
         #self.car_init()
     
-    def callback(self, us1_msg, us2_msg, bat_msg, odom_msg, vo_msg):
-        #print("Smth")
-        self.range_value1 = us1_msg.range
-        self.range_value2 = us2_msg.range
+
     
-    def us1_callback(self, msg):
-        print("US1")
-        self.range_value1 = msg.range
-        if msg.range <= msg.min_range:
-            self.state_status = "Obastcale"
-#     
-#     def us2_callback(self, msg):
-#         print("US2")
-#         self.range_value2 = msg.range
-#         if msg.range <= msg.min_range:
-#             self.state_status = "Obastcale"
-#             
-#     def bat_callback(self, msg):
-#         self.battery_voltage = msg.voltage
-#         if msg.voltage <= self.min_voltage:
-#             self.state_status = "Undervoltage"
-#     
-#     def pos_callback(self, msg):
-#         print("pos")
-#         self.point[0] = msg.pose.pose.position.x
-#         self.point[1] = msg.pose.pose.position.y
-#         self.point[2] = msg.pose.pose.position.z
-#         
-#         self.quaternion[3] = msg.pose.pose.orientation.w
-# 
-#     def odom_callback(self, msg):
-#         print("Got odom")       
+    def callback(self, msg):       
+        self.range_value1 = msg.US1.range
+        self.range_value2 = msg.US2.range
+        self.vo_pose = msg.VO.pose.pose.position
+        self.vo_quat = msg.VO.pose.pose.orientation
+
     
     def random_movement(self):       
         if self.state_status == "Undervoltage":
@@ -112,7 +79,8 @@ class us_mvmnt():
             # self.car.turn(self.CENTER)
             # self.car.move_backward(self.SPEED)  
             sleep(1)
-            print("{} s, {} m, ".format(rospy.Time, self.range_value1, self.range_value2))
+            self.time_secs -= rospy.get_time()
+            rospy.loginfo("{:.2f} {:.2f} {:.2f} {:.2f} {:.2f}".format(self.time_secs, self.range_value1, self.range_value2, self.vo_pose, self.vo_quat))
 
         self.car.stop_all()
         self.car.turn(self.CENTER)
