@@ -11,7 +11,7 @@ from rpicar.msg import telemetry
 from time import sleep
 class us_mvmnt():
     min_voltage = 6.5
-    
+    min_range = 0.05
     def __init__(self, US1_topic, US2_topic):
         #self.pca = PCA9685(0x41)
         self.car = car_movement_PCA9685(PCA9685(0x41))
@@ -35,8 +35,14 @@ class us_mvmnt():
         self.range_value2 = 0.0
         self.min_range = 0.02
 
-        self.vo_pose = [0, 0, 0]
-        self.vo_quat = [0, 0, 0, 1]
+        self.vo_px = None
+        self.vo_py = None
+        self.vo_pz = None
+
+        self.vo_qx = None
+        self.vo_qy = None
+        self.vo_qz = None
+        self.vo_qw = None
         
         # self.point = [0, 0, 0]
         # self.quaternion = [0, 0, 0, 1]
@@ -50,10 +56,22 @@ class us_mvmnt():
     def callback(self, msg):       
         self.range_value1 = msg.US1.range
         self.range_value2 = msg.US2.range
-        self.vo_pose = msg.VO.pose.pose.position
-        self.vo_quat = msg.VO.pose.pose.orientation
 
-    
+        self.vo_px = msg.VO.pose.pose.position.x
+        self.vo_py = msg.VO.pose.pose.position.y
+        self.vo_pz = msg.VO.pose.pose.position.z
+
+        self.vo_qx = msg.VO.pose.pose.orientation.x
+        self.vo_qy = msg.VO.pose.pose.orientation.y
+        self.vo_qz = msg.VO.pose.pose.orientation.z
+        self.vo_qw = msg.VO.pose.pose.orientation.w
+        # self.vo_pose = msg.VO.pose.pose.position
+        # self.vo_quat = msg.VO.pose.pose.orientation
+
+    def obstacles_state_computing(self):
+        if self.range_value1 <= self.min_range or self.range_value1 <= self.min_range:
+            self.state_status == "Obastcale"
+
     def random_movement(self):       
         if self.state_status == "Undervoltage":
             self.car.stop_all()
@@ -75,12 +93,13 @@ class us_mvmnt():
     
     def loop(self):
         while not rospy.is_shutdown():
-            self.random_movement()
+            #self.random_movement()
             # self.car.turn(self.CENTER)
             # self.car.move_backward(self.SPEED)  
-            sleep(1)
-            self.time_secs -= rospy.get_time()
-            rospy.loginfo("{:.2f} {:.2f} {:.2f} {:.2f} {:.2f}".format(self.time_secs, self.range_value1, self.range_value2, self.vo_pose, self.vo_quat))
+            self.time_secs = rospy.get_time() - self.time_secs
+            if self.time_secs % 1 == 0:
+                rospy.loginfo("t:{:.2f}[s] ob1:{:.2f}[m] ob2:{:.2f}[m] px:{:.2f} py:{:.2f} pz{:.2f}".format(
+                    self.time_secs, self.range_value1, self.range_value2, self.vo_px, self.vo_py, self.vo_pz))
 
         self.car.stop_all()
         self.car.turn(self.CENTER)
