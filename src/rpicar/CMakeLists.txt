@@ -165,8 +165,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
  catkin_install_python(PROGRAMS
-   src/scripts/battery_talker.py src/scripts/US_talker.py src/scripts/IMU_talker.py src/scripts/camera_talker.py
-   src/scripts/autopilot.py src/scripts/tf_camera_publisher.py  src/scripts/vo_covariance_talker.py 
+   src/scripts/battery_talker.py src/scripts/US_talker.py src/scripts/camera_talker.py
+   src/scripts/autopilot.py src/scripts/tf_camera_publisher.py src/scripts/vo_covariance_talker.py src/scripts/IMU_localization_talker.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 

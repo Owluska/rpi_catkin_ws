@@ -2,7 +2,7 @@
 import roslib
 import rospy
 import tf
-import nav_msgs.msg import Odometry
+from nav_msgs.msg import Odometry
 #from sensor_msgs.msg import Image, CameraInfo
 
 
@@ -22,7 +22,7 @@ def handle_camera_pose(msg):
 
 def main():
     rospy.init_node('usb_camera_tf_publisher')
-     rospy.Subscriber("/odom", Odometry, handle_camera_pose, queue_size = 10)
+    rospy.Subscriber("/odom", Odometry, handle_camera_pose, queue_size = 10)
     
 if __name__ == "__main__":
     main()
