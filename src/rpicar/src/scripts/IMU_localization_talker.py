@@ -5,11 +5,12 @@ from sensor_msgs.msg import Imu, MagneticField, Temperature
 
 
 from library.mpu9250_lib import mpu9250
-
+from library.es_ekf import ekf
 import numpy as np
 import math
 import ahrs
 from ahrs import Quaternion
+# from filterpy.kalman import ExtendedKalmanFilter
 
 from time import sleep, time
 
@@ -55,6 +56,7 @@ class imu_talker():
         self.mag_data = np.array([[.0,.0,.0]])
         self.quat_data = np.array([[1.0, .0, .0, 0.0]])
         self.use_magnetometer = False
+        
         if self.use_magnetometer:  
             #self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data, mag = self.mag_data)
             self.filter = ahrs.filters.Complementary(acc = self.acc_data, gyr = self.gyro_data, mag = self.mag_data, frequency = 1/self.t_step)
@@ -90,8 +92,13 @@ class imu_talker():
         self.pub_temp = rospy.Publisher("imu/temp", Temperature, queue_size = 10)
 
         
-        self.print = False
+        self.print = True
         self.loop_rate= rospy.Rate(0.05)
+
+        self.kf = ekf()
+        self.kf.var_f = self.var_f
+        self.kf.var_w = self.var_w
+        self.kf.var_m = self.var_m
 
     def get_mpu9250_data(self):
             self.ax,self.ay,self.az,self.gx,self.gy,self.gz = self.imu.mpu6050_conv() # read and convert mpu6050 data
@@ -172,7 +179,7 @@ class imu_talker():
         
         self.pub_temp.publish(self.temp_msg)
 
-    def get_attitude(self):
+    def get_orientation(self):
         if self.use_magnetometer:
             #self.filter.updateMARG(self.quat_data[-1], gyr = self.gyro_data[-1], acc = self.acc_data[-1], mag = self.mag_data[-1])
             pass      
@@ -190,6 +197,12 @@ class imu_talker():
         for k, a in zip(self.orientation, angles): 
             self.orientation[k] = float(a)
 
+    def get_position(self):
+        self.kf.q_est[-1] = self.quat_data[-1]
+        #k = self.quat_data.shape[0] - 1
+        self.kf.update(self.acc_data[-1], self.gyro_data[-1], self.dt)
+        self.position = self.kf.p_est
+
     def start(self):
         tt = time()
         while not rospy.is_shutdown():
@@ -202,13 +215,14 @@ class imu_talker():
             if self.publish:
                 self.talker()
 
-            self.get_attitude()
+            self.get_orientation()
+            self.get_position()
             
             rospy.set_param("orientation", self.orientation)
             
             if self.t % 1 <= 0.15 and self.print:
-                data = self.orientation
-                template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, *data.values())   
+                data = self.position[-1]
+                template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, *data)#*data.values())   
                 print(template)
 
             sleep(self.t_step)
@@ -219,7 +233,6 @@ def main(args):
     rospy.init_node('imu_talker', anonymous = True)   
     talker = imu_talker()
     talker.start()    
-
 
 if __name__ == '__main__':
     main(sys.argv) 
