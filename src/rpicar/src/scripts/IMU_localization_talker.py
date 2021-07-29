@@ -43,12 +43,14 @@ class imu_talker():
         self.acc_data = np.array([self.ax, self.ay, self.az])
         self.gyro_data = np.array([self.gx, self.gy, self.gz]) 
         self.t_step = 0.03  
-
+        
+        self.isMoving = False 
+        
         self.g = 9.84
         self.D2R = math.pi/180
         self.R2D = 180 /math.pi
 
-        self.pose = np.array([.0, .0, .0])
+        self.position = {'x':0.0, 'y':.0, 'z':.0}
         self.orientation = {'roll':0.0, 'pitch':.0, 'yaw':.0}
         
         self.acc_data = np.array([[.0, .0, self.g]])
@@ -92,13 +94,14 @@ class imu_talker():
         self.pub_temp = rospy.Publisher("imu/temp", Temperature, queue_size = 10)
 
         
-        self.print = True
+        self.print = False
         self.loop_rate= rospy.Rate(0.05)
 
         self.kf = ekf()
         self.kf.var_f = self.var_f
         self.kf.var_w = self.var_w
         self.kf.var_m = self.var_m
+        self.kf.g = np.array([0, 0, -self.g]) 
 
     def get_mpu9250_data(self):
             self.ax,self.ay,self.az,self.gx,self.gy,self.gz = self.imu.mpu6050_conv() # read and convert mpu6050 data
@@ -199,9 +202,17 @@ class imu_talker():
 
     def get_position(self):
         self.kf.q_est[-1] = self.quat_data[-1]
+        self.isMoving = rospy.get_param("moving_state", default = False)
+        #rospy.loginfo("isM: {}".format(self.isMoving))
+        if not self.isMoving:
+            self.kf.v_est[-1] = np.zeros((1,3))
+            self.kf.a[-1] = np.zeros((1,3))
         #k = self.quat_data.shape[0] - 1
         self.kf.update(self.acc_data[-1], self.gyro_data[-1], self.dt)
-        self.position = self.kf.p_est
+        coords = self.kf.p_est[-1]
+        for k, c in zip(self.position, coords): 
+            self.position[k] = float(c)
+   
 
     def start(self):
         tt = time()
@@ -219,6 +230,7 @@ class imu_talker():
             self.get_position()
             
             rospy.set_param("orientation", self.orientation)
+            rospy.set_param("position", self.position)
             
             if self.t % 1 <= 0.15 and self.print:
                 data = self.position[-1]

@@ -22,7 +22,7 @@ class ekf:
 
        
 
-        self.g = np.array([0, 0, 9.81])       # gravity
+        self.g = np.array([0, 0, -9.81])       # gravity
         #self.g = np.array([0.,0., 6.500022])
         self.l_jac = np.zeros([9, 9])
         self.l_jac[3:, 3:] = np.eye(6)          # motion model noise jacobian
@@ -131,7 +131,7 @@ class ekf:
         self.ROT = q_prev.to_DCM()
         #print(self.ROT)
         a = self.ROT @ f + self.g
-        
+        #print(a)
 
         self.a = np.append(self.a, a.reshape(1,3), axis = 0)
         
