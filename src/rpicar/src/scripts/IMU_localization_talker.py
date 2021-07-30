@@ -227,10 +227,10 @@ class imu_talker():
                 self.talker()
 
             self.get_orientation()
-            self.get_position()
-            
             rospy.set_param("orientation", self.orientation)
-            rospy.set_param("position", self.position)
+            
+            #self.get_position()           
+            #rospy.set_param("position", self.position)
             
             if self.t % 1 <= 0.15 and self.print:
                 data = self.position[-1]

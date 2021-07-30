@@ -144,7 +144,7 @@ class car_movement_PCA9685():
         self.stop(self.A2, self.B2)
         self.turn(self.CENTER_DEGREE)
 
-    def move_forward(self, velocity):
+    def move_backward(self, velocity):
         if velocity < 0 or velocity > 100:
             velocity = 100  
         velocity = int(velocity * self.MAX_SPEED/100)
@@ -155,7 +155,7 @@ class car_movement_PCA9685():
         self.pwm.set_pwm(self.B1, 0, self.MIN_SPEED)
         self.pwm.set_pwm(self.B2, 0, self.MIN_SPEED)
        
-    def move_backward(self, velocity):
+    def move_forward(self, velocity):
         self.pwm.set_pwm(self.A1, 0, self.MIN_SPEED)
         self.pwm.set_pwm(self.A2, 0, self.MIN_SPEED)
         

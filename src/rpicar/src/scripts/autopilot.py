@@ -35,7 +35,7 @@ class us_mvmnt():
         self.range_value1 = None
         self.range_value2 = None
         
-        self.min_range = 0.02
+        # self.min_range = 0.02
 
         self.px = None
         self.py = None
@@ -81,13 +81,14 @@ class us_mvmnt():
             self.range_value1 = rospy.get_param('US1_data')
             self.range_value2 = rospy.get_param('US2_data')
             
+
             self.roll = rospy.get_param('orientation')['roll']
             self.pitch = rospy.get_param('orientation')['pitch']
             self.yaw = rospy.get_param('orientation')['yaw']
 
-            self.px = rospy.get_param('position')['x']
-            self.py = rospy.get_param('position')['y']
-            self.pz = rospy.get_param('position')['z']
+            # self.px = rospy.get_param('position')['x']
+            # self.py = rospy.get_param('position')['y']
+            # self.pz = rospy.get_param('position')['z']
         
         except Exception as e:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
@@ -95,11 +96,11 @@ class us_mvmnt():
                 rospy.loginfo(message)
     
     def state_computing(self):
-        if self.range_value1 <= self.min_range:
+        if self.range_value2 <= self.min_range:
             key = "ob_left"
             self.state_status = self.errors_dic[key]
         
-        elif self.range_value2 <= self.min_range:
+        elif self.range_value1 <= self.min_range:
             key = "ob_right"
             self.state_status = self.errors_dic[key]
        
@@ -113,8 +114,26 @@ class us_mvmnt():
         # data = str(self.errors_dic[key])
         # rospy.loginfo(data)
 
+    def turn_on_angle(self, angle, turnRight = True):
+        if self.yaw == None:
+            return
+        prev_angle = self.yaw
+        sign = 1
+        self.car.turn(self.LEFT)
+        if not turnRight:
+            sign = -1
+            self.car.turn(self.RIGHT)
+        while(1):
+            self.get_telemetry()
+            new_angle = self.yaw - prev_angle
+            if new_angle < sign * angle:
+                return 
+            self.car.move_forward(self.SPEED)
+            
+
     def random_movement(self):
         rospy.set_param("moving_state", True)
+        angle = 90
 
         if self.state_status == self.errors_dic['undervoltage']:
             self.car.stop_all()
@@ -126,12 +145,12 @@ class us_mvmnt():
         
         
         elif self.state_status == self.errors_dic['ob_left']:
-                self.car.turn(self.LEFT)
-                self.car.move_forward(self.MAX_SPEED)
+                self.turn_on_angle(angle, turnRight=True)
+                #self.car.move_forward(self.MAX_SPEED)
         
         elif self.state_status == self.errors_dic['ob_right']:
-                self.car.turn(self.RIGHT)
-                self.car.move_forward(self.MAX_SPEED)
+                self.turn_on_angle(angle, turnRight=False)
+                #self.car.move_forward(self.MAX_SPEED)
         
         elif self.state_status == self.errors_dic['ob_center']:
                 self.car.turn(self.CENTER)
@@ -143,6 +162,7 @@ class us_mvmnt():
     
     def loop(self):
         tt = time()
+        i = 0
         self.car.stop_all()
         while not rospy.is_shutdown():
             self.dt = time() - tt
@@ -150,19 +170,19 @@ class us_mvmnt():
             self.t += self.dt
             self.get_telemetry()
             self.state_computing()
-            #self.random_movement()
-  
-            try:
+            self.random_movement()
+            if i%20 == 0:
                 # rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] px:{:.2f}[m] py:{:.2f}[m] pz:{:.2f}[m] yaw:{:.2f}[deg]".format(
                 #         self.t, self.state_status, self.range_value1, self.range_value2, self.px, self.py, self.pz, self.yaw))
-                rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m]".format(
-                        self.t, self.state_status, self.range_value1, self.range_value2))
-            except Exception as e:
-                template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(e).__name__, e.args)
-                rospy.loginfo(message)
+                try:
+                    rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg]".format(
+                                self.t, self.state_status, self.range_value1, self.range_value2, self.yaw))
+                except Exception:
+                    pass
+
             # self.dt = rospy.get_time()
-            sleep(0.1)
+            sleep(0.5)
+            i += 1
             #self.loop_rate.sleep()
         self.car.stop_all()
         rospy.set_param("moving_state", False)
