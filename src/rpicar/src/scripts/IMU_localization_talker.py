@@ -4,7 +4,7 @@ import sys
 from sensor_msgs.msg import Imu, MagneticField, Temperature
 
 
-from library.mpu9250_lib import mpu9250
+from drivers.mpu9250_lib import mpu9250
 from library.es_ekf import ekf
 import numpy as np
 import math
@@ -60,11 +60,11 @@ class imu_talker():
         self.use_magnetometer = False
         
         if self.use_magnetometer:  
-            #self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data, mag = self.mag_data)
-            self.filter = ahrs.filters.Complementary(acc = self.acc_data, gyr = self.gyro_data, mag = self.mag_data, frequency = 1/self.t_step)
+            self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data, mag = self.mag_data)
+
         else:
-            #self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data)
-            self.filter = ahrs.filters.Complementary(acc = self.acc_data, gyr = self.gyro_data, frequency = 1/self.t_step)
+            self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data)
+    
         
         self.publish = False
         self.I = np.eye(3)
@@ -184,19 +184,17 @@ class imu_talker():
 
     def get_orientation(self):
         if self.use_magnetometer:
-            #self.filter.updateMARG(self.quat_data[-1], gyr = self.gyro_data[-1], acc = self.acc_data[-1], mag = self.mag_data[-1])
-            pass      
+            quat_data = self.filter.updateMARG(self.quat_data[-1], gyr = self.gyro_data[-1], acc = self.acc_data[-1], mag = self.mag_data[-1])
+      
         else:
-            #self.filter.updateIMU(self.quat_data[-1], gyr = self.gyro_data[-1], acc = self.acc_data[-1])
-            self.filter.attitude_propagation(self.quat_data[-1], omega = self.gyro_data[-1])
-            quat_data = self.filter.update(self.quat_data[-1], gyr = self.gyro_data[-1], acc = self.acc_data[-1])
-            #print(self.quat_data)
-        
+            quat_data = self.filter.updateIMU(self.quat_data[-1], gyr = self.gyro_data[-1], acc = self.acc_data[-1])
+    
         quat_data = quat_data.reshape((1, 4))
         self.quat_data = np.append(self.quat_data, quat_data, axis = 0)
-        #self.quat_data = self.filter.Q
+  
         angles = Quaternion(self.quat_data[-1]).to_angles()
         angles *= self.R2D
+
         for k, a in zip(self.orientation, angles): 
             self.orientation[k] = float(a)
 
@@ -216,6 +214,7 @@ class imu_talker():
 
     def start(self):
         tt = time()
+        self.print = True
         while not rospy.is_shutdown():
             self.dt = time() - tt
             tt = time()
@@ -233,8 +232,8 @@ class imu_talker():
             #rospy.set_param("position", self.position)
             
             if self.t % 1 <= 0.15 and self.print:
-                data = self.position[-1]
-                template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, *data)#*data.values())   
+                data = self.orientation
+                template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, *data.values())#*data.values())   
                 print(template)
 
             sleep(self.t_step)

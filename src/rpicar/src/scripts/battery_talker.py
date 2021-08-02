@@ -7,7 +7,7 @@ from sensor_msgs.msg import BatteryState
 from ina219 import INA219
 from time import time, sleep
 from datetime import datetime
-from library.multiplexer import PCA9547
+from drivers.multiplexer import PCA9547
 from rpicar.msg import telemetry
 
 class battery_state_proc():

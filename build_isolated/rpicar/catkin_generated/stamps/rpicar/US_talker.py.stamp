@@ -5,7 +5,7 @@ import sys
 from sensor_msgs.msg import Range
 
 from rpicar.msg import telemetry
-from library.US_lib import US
+from drivers.US_lib import US
 
 
 class US_talker():

@@ -4,7 +4,7 @@ import rospy
 # from sensor_msgs.msg import Range, BatteryState
 # from nav_msgs.msg import Odometry
 # from geometry_msgs.msg import PoseWithCovarianceStamped
-from library.motors import PCA9685, car_movement_PCA9685
+from drivers.motors import PCA9685, car_movement_PCA9685
 from rpicar.msg import telemetry
 
 # from message_filters import TimeSynchronizer, Subscriber
@@ -115,20 +115,25 @@ class us_mvmnt():
         # rospy.loginfo(data)
 
     def turn_on_angle(self, angle, turnRight = True):
+        self.get_telemetry()
         if self.yaw == None:
             return
-        prev_angle = self.yaw
-        sign = 1
+        traget_angle = angle + self.yaw
+        rospy.loginfo("Start: yaw:{:.2f}[deg] target:{:.2f}[deg]".format(self.yaw, traget_angle)) 
+        #sign = 1
         self.car.turn(self.LEFT)
         if not turnRight:
-            sign = -1
+            #sign = -1
             self.car.turn(self.RIGHT)
-        while(1):
+        while(1):         
             self.get_telemetry()
-            new_angle = self.yaw - prev_angle
-            if new_angle < sign * angle:
+            
+            if self.yaw > traget_angle:
                 return 
             self.car.move_forward(self.SPEED)
+            sleep(0.01)
+            rospy.loginfo("t:{:.2f}[s] yaw:{:.2f}[deg] target:{:.2f}[deg]".format(self.t, self.yaw, traget_angle))
+            
             
 
     def random_movement(self):
@@ -165,25 +170,28 @@ class us_mvmnt():
         i = 0
         self.car.stop_all()
         while not rospy.is_shutdown():
-            self.dt = time() - tt
-            tt = time()
-            self.t += self.dt
-            self.get_telemetry()
-            self.state_computing()
-            self.random_movement()
-            if i%20 == 0:
-                # rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] px:{:.2f}[m] py:{:.2f}[m] pz:{:.2f}[m] yaw:{:.2f}[deg]".format(
-                #         self.t, self.state_status, self.range_value1, self.range_value2, self.px, self.py, self.pz, self.yaw))
-                try:
-                    rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg]".format(
-                                self.t, self.state_status, self.range_value1, self.range_value2, self.yaw))
-                except Exception:
-                    pass
+            try:
+                self.dt = time() - tt
+                tt = time()
+                self.t += self.dt
+                self.get_telemetry()
+                self.state_computing()
+                #self.random_movement()
+                # if i%20 == 0:
+                #     # rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] px:{:.2f}[m] py:{:.2f}[m] pz:{:.2f}[m] yaw:{:.2f}[deg]".format(
+                #     #         self.t, self.state_status, self.range_value1, self.range_value2, self.px, self.py, self.pz, self.yaw))
+                #     try:
+                #         rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg]".format(
+                #                     self.t, self.state_status, self.range_value1, self.range_value2, self.yaw))
+                #     except Exception:
+                #         pass
 
-            # self.dt = rospy.get_time()
-            sleep(0.5)
-            i += 1
-            #self.loop_rate.sleep()
+                # self.dt = rospy.get_time()
+                sleep(0.5)
+                i += 1
+                #self.loop_rate.sleep()
+            except KeyboardInterrupt:
+                break
         self.car.stop_all()
         rospy.set_param("moving_state", False)
         self.car.turn(self.CENTER)
