@@ -8,24 +8,26 @@ from drivers.mpu9250_lib import mpu9250
 
 
 class mpu_calibration:
-    path = 'src/rpicar/src/scripts/data/'
-    name = 'imu_offsets.txt'    
-    cf = open(path+name, 'w')
-    
-    def __init__(self):
+    path = 'src/rpicar/src/scripts/data/'   
+    def __init__(self, name = 'imu_offsets.txt', open_option = 'w'):
+        self.name = name    
+        self.cf = open(self.path+self.name, open_option)
         self.mpu = mpu9250()
         self.mpu.MPU6050_start()
         self.mpu.AK8963_start()
 
         self.data_size = 500
 
-        self.raw_data = np.zeros((self.data_size,9))
+        #self.raw_data = np.zeros((self.data_size,9))
         self.gyro_offsets = np.zeros((1,3))
         self.acc_offsets = np.zeros((2,3))
+        self.mag_coeffs = np.zeros((2,3))
         
         self.keys = ['gx_off', 'gy_off', 'gz_off', 
                      'ax_slp', 'ay_slp', 'az_slp',
-                     'ax_off', 'ay_off', 'az_off']
+                     'ax_off', 'ay_off', 'az_off',
+                     'mx_slp', 'my_slp', 'mz_slp',
+                     'mx_off', 'my_off', 'mz_off']
         self.json_str = ""
         self.dict = {}
 
@@ -43,14 +45,15 @@ class mpu_calibration:
         return y
 
     def gyro_calibration(self):
+        gyro_data = np.zeros((self.data_size,3))
         for i in range(self.data_size):
             try:
                 gyro = np.array(self.get_gyro())
-                self.raw_data[i, :3] = gyro
+                self.gyro_data[i] = gyro
             except Exception:
                 continue 
         
-        self.gyro_offsets = np.mean(self.raw_data[:, :3], axis = 0)
+        self.gyro_offsets = np.mean(gyro_data, axis = 0)
 
     def acc_calibration(self):
         #for each axis mowing IMU in three directons
@@ -59,7 +62,7 @@ class mpu_calibration:
         axes = ['x', 'y', 'z']
         indices = [2, 1, 0]
         directions = ['upward', 'downward', 'perpendicular to gravity']
-
+        acc_data = np.zeros((self.data_size,3))
         for i, a in enumerate(axes):
             x_data = np.zeros((self.data_size,3))
             for j, d in enumerate(directions):
@@ -70,17 +73,14 @@ class mpu_calibration:
 
                 for k in range(self.data_size):
                     try:
-                        acc = np.array(self.get_acc())
-                        self.raw_data[k, 3:6] = acc
+                        acc_data[k] = np.array(self.get_acc())
+                        #self.raw_data[k, 3:6] = acc
                         #print(acc)
                         
                     except Exception:
-                        continue 
-                
-                    #add data array from axis pointing to the gravity, see 
-                    #print(i, j, len(indices),  x_data.shape, self.raw_data.shape)
-                
-                x_data[:, j] = self.raw_data[:, 3 + indices[i]]
+                        continue          
+                #add data array from axis pointing to the gravity, see axes variable
+                x_data[:, j] = acc_data[:, indices[i]]
 
             #using calibrations (+1g, -1g, 0g) for linear fit
             ones = np.ones(self.data_size, dtype = 'float')
@@ -93,6 +93,56 @@ class mpu_calibration:
             #print(coeffs)
             self.acc_offsets[0, indices[i]] = coeffs[0]
             self.acc_offsets[1, indices[i]] = coeffs[1]
+
+    def outlier_removal(data, stdev_mult = 5.0):
+        diff = np.diff(data)
+
+        edges = np.abs(np.mean(diff)) + stdev_mult * np.std(diff)
+        diff = np.abs(diif)      
+        outliers = np.where(diff > edges)
+ 
+
+        if len(outliers) != 0:
+            data[outliers] = np.nan
+        return data
+
+    def mag_calibration(self):
+        # [[x,y], [y,z], [x,z]]
+        # indices of heading for each axis
+        cal_rot_indices = [[0,1],[1,0],[2,2]]
+        mag_cal_axes = ['z','y','x']
+        mag_calib_data = []
+        for i, axis in enumerate(mag_cal_axes):
+            template = "Press Enter and Start Rotating the IMU Around the {}-axis".format(axis)
+            input(template)
+            print("\t When Finished, Press CTRL+C")
+            mag_data = np.zeros((1,3))
+
+            while True:
+                try:
+                    mags = np.array(self.mpu.AK8963_conv()).reshape((1,3)) # read and convert AK8963 magnetometer data
+                    mag_data = np.append(mag_data, mags, axis = 0)
+                except KeyboardInterrupt:
+                    break
+            mag_data = mag_data[20:] #throw away first 20 points
+            mag_calib_data.append(mag_data)
+        
+        mag_calib_data = np.array(mag_calib_data)
+        indicies_to_save = [0,0,1]
+        
+        for i, vec in enumerate(mag_calib_data):
+            x,y = vec[:, cal_rot_indices[i][0]], vec[:, cal_rot_indices[i][1]]
+            #fills np.nan all outlier values
+            x = self.outlier_removal(x)
+            y = self.outlier_removal(y)
+       
+            slope = np.nanmax(y) - np.nanmin(y)/np.nanmax(x) - np.nanmin(x)
+            offset = (np.nanmax(x) + np.nanmin(x))/2.0 - np.nanmax(x) * slope         
+
+            self.mag_coeffs[0, i]
+               
+
+            
 
     def data_to_json(self, keys, data):    
         # l = len(keys)
@@ -111,8 +161,13 @@ class mpu_calibration:
     
     def write_file(self):
         self.data_to_json(self.keys[:3], self.gyro_offsets)
+        
         self.data_to_json(self.keys[3:6], self.acc_offsets[0])
         self.data_to_json(self.keys[6:9], self.acc_offsets[1])
+        
+        self.data_to_json(self.keys[9:12], self.mag_offsets[0])
+        self.data_to_json(self.keys[12:15], self.mag_offsets[1])
+
         #remove last comma and space
         self.json_str = self.json_str[:-2]
         #add curly brackets
@@ -124,10 +179,11 @@ class mpu_calibration:
     def close_file(self):
         self.cf.close()
 
-cal = mpu_calibration()
+cal = mpu_calibration(open_option='a')
 
-cal.gyro_calibration()
-cal.acc_calibration()
+# cal.gyro_calibration()
+# cal.acc_calibration()
+cal.mag_calibration()
 cal.write_file()
 print(cal.dict)
 
