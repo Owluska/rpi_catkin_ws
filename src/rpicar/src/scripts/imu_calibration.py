@@ -123,8 +123,11 @@ class mpu_calibration:
                 try:
                     mags = np.array(self.mpu.AK8963_conv()).reshape((1,3)) # read and convert AK8963 magnetometer data
                     mag_data = np.append(mag_data, mags, axis = 0)
-                except KeyboardInterrupt:
-                    break
+                except (Exception, KeyboardInterrupt) as e:  
+                    if type(e).__name__ == 'KeyboardInterrupt':
+                        break
+                    else:
+                        continue
             mag_data = mag_data[20:] #throw away first 20 points
             mag_calib_data.append(mag_data)
         
@@ -135,7 +138,7 @@ class mpu_calibration:
         #10.1109/ICCE.2019.8661986
         slop_offs_indicies = [[0,1],[1,0],[2,2]]
         for i, vec in enumerate(mag_calib_data):
-            x,y = vec[:, slop_offs_indicies[i][0]], vec[:, slop_offs_indicies[i][1]]
+            m1, m2 = vec[:, slop_offs_indicies[i][0]], vec[:, slop_offs_indicies[i][1]]
             #fills np.nan all outlier values
             m1 = self.outlier_removal(m1)
             m2 = self.outlier_removal(m2)
@@ -189,6 +192,10 @@ class mpu_calibration:
 
     def close_file(self):
         self.cf.close()
+
+from drivers.multiplexer import PCA9547
+
+pca = PCA9547()
 
 cal = mpu_calibration(open_option='a')
 cal.calibrate_all()
