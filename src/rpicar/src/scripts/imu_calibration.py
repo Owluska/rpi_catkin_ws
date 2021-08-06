@@ -12,6 +12,7 @@ class mpu_calibration:
     def __init__(self, name = 'imu_offsets.txt', open_option = 'w'):
         self.name = name    
         self.cf = open(self.path+self.name, open_option)
+
         self.mpu = mpu9250()
         self.mpu.MPU6050_start()
         self.mpu.AK8963_start()
@@ -94,12 +95,14 @@ class mpu_calibration:
             self.acc_offsets[0, indices[i]] = coeffs[0]
             self.acc_offsets[1, indices[i]] = coeffs[1]
 
-    def outlier_removal(data, stdev_mult = 5.0):
-        diff = np.diff(data)
+    def outlier_removal(self, data, stdev_mult = 5.0):
+        #print(data.shape)
+        diff = np.diff(data, axis=0)
 
-        edges = np.abs(np.mean(diff)) + stdev_mult * np.std(diff)
-        diff = np.abs(diif)      
-        outliers = np.where(diff > edges)
+        edge = np.abs(np.mean(diff, axis=0)) + stdev_mult * np.std(diff)
+        #print(edge, diff)
+        diff = np.abs(diff)      
+        outliers = np.where(diff > edge)
  
 
         if len(outliers) != 0:
@@ -108,8 +111,6 @@ class mpu_calibration:
 
     def mag_calibration(self):
         # [[x,y], [y,z], [x,z]]
-        # indices of heading for each axis
-        cal_rot_indices = [[0,1],[1,0],[2,2]]
         mag_cal_axes = ['z','y','x']
         mag_calib_data = []
         for i, axis in enumerate(mag_cal_axes):
@@ -128,18 +129,22 @@ class mpu_calibration:
             mag_calib_data.append(mag_data)
         
         mag_calib_data = np.array(mag_calib_data)
-        indicies_to_save = [0,0,1]
-        
-        for i, vec in enumerate(mag_calib_data):
-            x,y = vec[:, cal_rot_indices[i][0]], vec[:, cal_rot_indices[i][1]]
-            #fills np.nan all outlier values
-            x = self.outlier_removal(x)
-            y = self.outlier_removal(y)
-       
-            slope = np.nanmax(y) - np.nanmin(y)/np.nanmax(x) - np.nanmin(x)
-            offset = (np.nanmax(x) + np.nanmin(x))/2.0 - np.nanmax(x) * slope         
 
-            self.mag_coeffs[0, i]
+        # indices axes for offsets and slope for each axis
+        #based on this paper with DOI:
+        #10.1109/ICCE.2019.8661986
+        slop_offs_indicies = [[0,1],[1,0],[2,2]]
+        for i, vec in enumerate(mag_calib_data):
+            x,y = vec[:, slop_offs_indicies[i][0]], vec[:, slop_offs_indicies[i][1]]
+            #fills np.nan all outlier values
+            m1 = self.outlier_removal(m1)
+            m2 = self.outlier_removal(m2)
+       
+            slope = np.nanmax(m2) - np.nanmin(m2)/np.nanmax(m1) - np.nanmin(m1)
+            offset = (np.nanmax(m1) + np.nanmin(m1))/2.0 - np.nanmax(m1) * slope         
+
+            self.mag_coeffs[0, i] = offset
+            self.mag_coeffs[1, i] = slope
                
 
             
@@ -152,8 +157,7 @@ class mpu_calibration:
         #         s += ", "
         #         l = len(keys)
         for k, go in zip(keys, data):
-            self.json_str += "\"{:s}\":{}, ".format(k, go)
-
+            self.json_str += "\"{:s}\":\"{}\", ".format(k, go)
         return self.json_str
     
     def json_to_dict(self):
@@ -165,25 +169,28 @@ class mpu_calibration:
         self.data_to_json(self.keys[3:6], self.acc_offsets[0])
         self.data_to_json(self.keys[6:9], self.acc_offsets[1])
         
-        self.data_to_json(self.keys[9:12], self.mag_offsets[0])
-        self.data_to_json(self.keys[12:15], self.mag_offsets[1])
+        self.data_to_json(self.keys[9:12], self.mag_coeffs[0])
+        self.data_to_json(self.keys[12:15], self.mag_coeffs[1])
 
         #remove last comma and space
         self.json_str = self.json_str[:-2]
         #add curly brackets
         self.json_str = "{" + self.json_str + "}"
         self.cf.write(self.json_str)
+        self.cf.write('\n')
         # save data to dictonary, usefull for debugging 
         self.json_to_dict()
+    
+    def calibrate_all(self):
+        cal.gyro_calibration()
+        cal.acc_calibration()
+        cal.mag_calibration()
+        cal.write_file()
 
     def close_file(self):
         self.cf.close()
 
 cal = mpu_calibration(open_option='a')
-
-# cal.gyro_calibration()
-# cal.acc_calibration()
-cal.mag_calibration()
-cal.write_file()
+cal.calibrate_all()
 print(cal.dict)
 
