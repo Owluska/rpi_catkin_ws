@@ -46,15 +46,22 @@ class mpu_calibration:
         return y
 
     def gyro_calibration(self):
+        attempts = 0
         gyro_data = np.zeros((self.data_size,3))
         for i in range(self.data_size):
             try:
                 gyro = np.array(self.get_gyro())
                 self.gyro_data[i] = gyro
+                attempts = 0
             except Exception:
+                if attempts > 10:
+                    print("Sensor is probably not connected! Returning..")
+                    return -1
+                attempts += 1
                 continue 
         
         self.gyro_offsets = np.mean(gyro_data, axis = 0)
+        return 0
 
     def acc_calibration(self):
         #for each axis mowing IMU in three directons
@@ -185,10 +192,13 @@ class mpu_calibration:
         self.json_to_dict()
     
     def calibrate_all(self):
-        cal.gyro_calibration()
-        cal.acc_calibration()
-        cal.mag_calibration()
-        cal.write_file()
+        res = cal.gyro_calibration()
+        if res == -1:
+            self.cf.close()
+        else:
+            cal.acc_calibration()
+            cal.mag_calibration()
+            cal.write_file()
 
     def close_file(self):
         self.cf.close()
