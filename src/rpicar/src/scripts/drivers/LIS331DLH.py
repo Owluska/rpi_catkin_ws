@@ -18,7 +18,7 @@ class LIS331DLH():
     OUT_Y_H = 0x2A
     OUT_Y_H = 0x2B
     OUT_Z_L = 0x2C
-    OUT_Z_L = 0x2D
+    OUT_Z_H = 0x2D
 
     STATUS_REG = 0x27
     #Bytes
@@ -33,55 +33,64 @@ class LIS331DLH():
     PM1 = 0x40 
     PM2 = 0x80 
     
-    ZYXOR = 0x80
-    
+      
     XDA = 0x01
     YDA = 0x02
     ZDA = 0x04
-
     ZYXDA = 0x08
+    ZYXOR = 0x80 
 
     BDU = 0x08
     
     GRAVITY_EARTH = 9.80665
 
-    SENS_2G = 2 * 2/ (2 ** 16)
-    SENS_4G = 4 * 2/ (2 ** 16)
-    SENS_8G = 8 * 2/ (2 ** 16)
+    # SENS_2G = 2 * 2/ (2 ** 16)
+    # SENS_4G = 4 * 2/ (2 ** 16)
+    # SENS_8G = 8 * 2/ (2 ** 16)
 
-    ACC_RANGES = {'RANGE_2G':SENS_2G, 'RANGE_4G':SENS_4G, 'RANGE_8G':SENS_8G}
+    # ACC_RANGES = {'RANGE_2G':SENS_2G, 'RANGE_4G':SENS_4G, 'RANGE_8G':SENS_8G}
 
     def __init__(self, channel = 0):
+        class range:
+            def __init__(self, fs0, fs1, value, name):
+                self.FS0 = fs0
+                self.FS1 = fs1
+                self.value = value
+                self.name = name
+                self.scale = self.value *  2/ (2 ** 16)
+        
+        self.range_2G = range(    0x00,     0x00, 2, '2G')
+        self.range_4G = range(    0x00, self.FS0, 4, '4G')
+        self.range_8G = range(self.FS1, self.FS0, 8, '8G')
+        
         self.bus = smbus.SMBus(1) # start comm with i2c bus
-
-        self.scale_factor = 1.0 
+        self.range = self.range_2G
+        self.scale_factor = self.range_2G.scale 
         
         self.setup()
 
-        self.ax = 0.0
-        self.ay = 0.0
-        self.az = 0.0
+        self.x = 0.0
+        self.y = 0.0
+        self.z = 0.0
+
+        self.rx = 0.0
+        self.ry = 0.0
+        self.rz = 0.0
 
     
     def setup(self):
         #enable x, y, z axes
-        self.data = self.X_EN | self.Y_EN | self.Z_EN
+        data = self.X_EN | self.Y_EN | self.Z_EN
         # power mode - normal
-        self.data |= self.PM0
-        self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG1, self.data)
+        data |= self.PM0
+        self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG1, data)
         self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG4, self.BDU)
-        self.set_range('RANGE_2G')
     
     def set_range(self, range):         
-        data = self.bus.read_i2c_block_data(self.SLAVE_ADDRESS, self.CTRL_REG4)
-        if range == 'RANGE_4G':
-            data = self.FS0
-        elif range == 'RANGE_8G':
-            data |= self.FS0 |self.FS0
-        
-        self.scale_factor = self.ACC_RANGES[range]
-        if range !=  'RANGE_2G': 
-            self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG4, self.data)
+        data = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG4)
+        data |= range.FS0 | range.FS1 
+        self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG4, data)
+        self.scale_factor = range.scale
         
 
     # def acc_sleep(toSleep):
@@ -103,7 +112,7 @@ class LIS331DLH():
 
         bs = bytes(data)
         # < -little-endian, h - short type: 2 bytes with sign
-        x, y, z = struct.unpack("<hhh", bs)
+        self.rx, self.ry, self.rz = struct.unpack("<hhh", bs)
               
         # x = data[0] | data[1] << 8
         # y = data[2] | data[3] << 8
@@ -114,7 +123,6 @@ class LIS331DLH():
         #     if d > 2 ** 15:
         #         data[i] -= 2 ** 16
         # x, y, z = data[0], data[1], data[2]
-        return x, y, z
 
 
     def readX(self):
@@ -125,9 +133,8 @@ class LIS331DLH():
         data[0] = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.OUT_X_L)
         data[1] = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.OUT_X_H)
         
-        bs = bytes(data)
-        x = struct.unpack("<h", bs)
-        return x
+        bs = bytes(data)      
+        self.rx = struct.unpack("<h", bs)[0]
 
     def readY(self):
         status = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.STATUS_REG)
@@ -137,9 +144,8 @@ class LIS331DLH():
         data[0] = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.OUT_Y_H)
         data[1] = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.OUT_Y_H)
 
-        bs = bytes(data)
-        y = struct.unpack("<h", bs)
-        return y
+        bs = bytes(data)   
+        self.ry = struct.unpack("<h", bs)[0]
     
     def readZ(self):
         status = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.STATUS_REG)
@@ -149,37 +155,27 @@ class LIS331DLH():
         data[0] = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.OUT_Z_L)
         data[1] = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.OUT_Z_H)
     
-        bs = bytes(data)
-        y = struct.unpack("<h", bs)
-        return z
+        bs = bytes(data)     
+        self.rz = struct.unpack("<h", bs)[0]
 
-    def read_acc_gXYZ(self):
-        try:
-            #x, y, z = self.readXYZ()
-            x = self.readX()
-            y = self.readY()
-            z = self.readZ()
-
-            self.ax = x * self.scale_factor
-            self.ay = y * self.scale_factor
-            self.az = z * self.scale_factor
-        except Exception:
-            return
-
-    
+    def raw_to_g(self):
+        self.x = self.rx * self.scale_factor
+        self.y = self.ry * self.scale_factor
+        self.z = self.rz * self.scale_factor
 
 
-
-    def read_acc_aXYZ(self):
-        self.read_acc_gXYZ()
-        self.ax *= self.GRAVITY_EARTH 
-        self.ay *= self.GRAVITY_EARTH
-        self.az *= self.GRAVITY_EARTH
+    def raw_to_ms(self):
+        self.x = self.rx * self.GRAVITY_EARTH * self.scale_factor
+        self.y = self.ry * self.GRAVITY_EARTH * self.scale_factor
+        self.z = self.rz * self.GRAVITY_EARTH * self.scale_factor
 
 
  
 
 
 acc = LIS331DLH()
-acc.read_acc_aXYZ()
-print(acc.ax, acc.ay, acc.az)
+#acc.set_range(acc.range_8G)
+acc.readXYZ()
+acc.raw_to_ms()
+print(acc.scale_factor)
+print(acc.x, acc.y, acc.z)
