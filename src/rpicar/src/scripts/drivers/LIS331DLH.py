@@ -52,14 +52,8 @@ class LIS331DLH():
     
     GRAVITY_EARTH = 9.80665
 
-    # SENS_2G = 2 * 2/ (2 ** 16)
-    # SENS_4G = 4 * 2/ (2 ** 16)
-    # SENS_8G = 8 * 2/ (2 ** 16)
-
-    # ACC_RANGES = {'RANGE_2G':SENS_2G, 'RANGE_4G':SENS_4G, 'RANGE_8G':SENS_8G}
-
     def __init__(self, channel = 0):
-        class range:
+        class data_range:
             def __init__(self, fs0, fs1, value, name):
                 self.FS0 = fs0
                 self.FS1 = fs1
@@ -81,9 +75,9 @@ class LIS331DLH():
                 self.value = value
                 self.bits = bits
         
-        self.range_2G = range(    0x00,     0x00, 2, '2G')
-        self.range_4G = range(    0x00, self.FS0, 4, '4G')
-        self.range_8G = range(self.FS1, self.FS0, 8, '8G')
+        self.range_2G = data_range(    0x00,     0x00, 2, '2G')
+        self.range_4G = data_range(    0x00, self.FS0, 4, '4G')
+        self.range_8G = data_range(self.FS1, self.FS0, 8, '8G')
 
         self.rate_50 = data_rate('50_Hz', 50, 0x00)
         self.rate_100 = data_rate('100_Hz', 100, self.DR0)
@@ -122,16 +116,21 @@ class LIS331DLH():
         if block_reading:
             self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG4, self.BDU)
     
-    def hp_filter_setup(self, freq, mode):
+    def hp_filter_setup(self, freq, mode,enable = True):
         data = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG2)
-        data |= mode | self. FDS | freq 
+        if enable:
+            data |= self.FDS
+        else:
+            data &= ~self.FDS & 0xFF
+            return        
+        data |= mode | freq 
         self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG2, data)
     
-    def set_range(self, range):         
+    def set_range(self, data_range):         
         data = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG4)
-        data |= range.FS0 | range.FS1 
+        data |= data_range.FS0 | data_range.FS1 
         self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG4, data)
-        self.scale_factor = range.scale
+        self.scale_factor = data_range.scale
               
 
     def readXYZ(self):

@@ -32,7 +32,7 @@ class mpu_calibration:
         self.json_str = ""
         self.dict = {}
 
-    def get_gyro(self):
+    def get_gyro(self, func):
         _,_,_,wx,wy,wz = self.mpu.mpu6050_conv() # read and convert gyro data
         return wx,wy,wz
 
@@ -45,12 +45,12 @@ class mpu_calibration:
         #print(y.shape, x.shape, k, b)
         return y
 
-    def gyro_calibration(self):
+    def gyro_calibration(self, gyro_func):
         attempts = 0
         gyro_data = np.zeros((self.data_size,3))
         for i in range(self.data_size):
             try:
-                gyro = np.array(self.get_gyro())
+                gyro = np.array(gyro_func)
                 self.gyro_data[i] = gyro
                 attempts = 0
             except Exception:
@@ -63,7 +63,7 @@ class mpu_calibration:
         self.gyro_offsets = np.mean(gyro_data, axis = 0)
         return 0
 
-    def acc_calibration(self):
+    def acc_calibration(self, acc_func):
         #for each axis mowing IMU in three directons
         # 'upward', 'downward', 'perpendicular to gravity' and then 
         # trying to find fitting coefficients as -1, 1, 0 
@@ -81,7 +81,7 @@ class mpu_calibration:
 
                 for k in range(self.data_size):
                     try:
-                        acc_data[k] = np.array(self.get_acc())
+                        acc_data[k] = np.array(acc_func)
                         #self.raw_data[k, 3:6] = acc
                         #print(acc)
                         
@@ -116,7 +116,7 @@ class mpu_calibration:
             data[outliers] = np.nan
         return data
 
-    def mag_calibration(self):
+    def mag_calibration(self, mag_func):
         # [[x,y], [y,z], [x,z]]
         mag_cal_axes = ['z','y','x']
         mag_calib_data = []
@@ -128,7 +128,7 @@ class mpu_calibration:
 
             while True:
                 try:
-                    mags = np.array(self.mpu.AK8963_conv()).reshape((1,3)) # read and convert AK8963 magnetometer data
+                    mags = np.array(mag_func).reshape((1,3)) # read and convert AK8963 magnetometer data
                     mag_data = np.append(mag_data, mags, axis = 0)
                 except (Exception, KeyboardInterrupt) as e:  
                     if type(e).__name__ == 'KeyboardInterrupt':
@@ -191,23 +191,32 @@ class mpu_calibration:
         # save data to dictonary, usefull for debugging 
         self.json_to_dict()
     
-    def calibrate_all(self):
-        res = cal.gyro_calibration()
+    def calibrate_all(self, gyro_func, acc_func, mag_func):
+        res = cal.gyro_calibration(gyro_func)
         if res == -1:
             self.cf.close()
         else:
-            cal.acc_calibration()
-            cal.mag_calibration()
+            cal.acc_calibration(acc_func)
+            cal.mag_calibration(mag_func)
             cal.write_file()
 
     def close_file(self):
         self.cf.close()
 
 from drivers.multiplexer import PCA9547
+from drivers.LIS331DLH import LIS331DLH
+
+acc = LIS331DLH()
+acc.hp_filter_setup(acc.hp_freq.bits, acc.hp_modes['reference'])
+
+def get_acc_data(acc):   
+    acc.readXYZ()
+    acc.raw_to_ms()
+    return acc.x, acc.y, acc.z 
 
 pca = PCA9547()
 
 cal = mpu_calibration(open_option='a')
-cal.calibrate_all()
+cal.calibrate_all(get_acc_data)
 print(cal.dict)
 
