@@ -159,7 +159,7 @@ class I3G4250D:
         else:
             # < -little-endian, h - short type: 2 bytes with sign
             read_str = "<hhh"
-            
+
         self.rx, self.ry, self.rz = struct.unpack(read_str, bs)
               
     def readX(self):
@@ -204,7 +204,7 @@ class I3G4250D:
 
 gyro = I3G4250D()
 gyro.read_degXYZ()
-print(gyro.sensetivity)
+# print(gyro.sensetivity)
 print(gyro.x, gyro.y, gyro.z)
 
 
