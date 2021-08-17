@@ -43,6 +43,7 @@ class I3G4250D:
     ST1 = 0x04
     FS0 = 0x10
     FS1 = 0x20
+    BLE = 0x40
 
     HPen = 0x10
     
@@ -61,8 +62,9 @@ class I3G4250D:
 
     def __init__(self):
         class RG:
-            def __init__(self, name, dps, bits):
+            def __init__(self, name, dps, sens, bits):
                 self.name = name
+                self.sensetivity = sens * 1e-3
                 self.scale_factor = dps * 2/ 2 ** 16
                 self.bits = bits
         class DR:
@@ -82,9 +84,9 @@ class I3G4250D:
                 self.autoreset = high_bit | low_bit 
         
         self.bus = smbus.SMBus(1) # start comm with i2c bus
-        self.RG_245 = RG('245dps', 245, 0x00)
-        self.RG_500 = RG('500dps', 500, self.FS0)
-        self.RG_2000 = RG('2000dps', 2000, self.FS1)
+        self.RG_245 = RG('245dps', 245, 8.75, 0x00)
+        self.RG_500 = RG('500dps', 500, 17.5, self.FS0)
+        self.RG_2000 = RG('2000dps', 2000, 70.0, self.FS1)
 
         self.DR_100 = DR('DR_100', 0x00, 100)
         self.DR_200 = DR('DR_200', self.DR0, 200)
@@ -102,6 +104,7 @@ class I3G4250D:
         self.hp_mode = HP_modes(self.HPM1, self.HPM0)
 
         self.scale = 245 * 2 / 2 ** 16
+        self.sensetivity = 8.75 * 1e-3
         self.start(self.BW_110, self.DR_800)       
         self.set_range(self.RG_245)
         
@@ -136,7 +139,9 @@ class I3G4250D:
         data = self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG4)
         data |= data_range.bits
         self.bus.write_byte_data(self.ADDRESS, self.CTRL_REG4, data)
+        
         self.scale = data_range.scale_factor
+        self.sensetivity = data_range.sensetivity
 
     def readXYZ(self):
         status = self.bus.read_byte_data(self.ADDRESS, self.STATUS_REG)
@@ -148,11 +153,15 @@ class I3G4250D:
         data = data[:6]
 
         bs = bytes(data)
-        # < -little-endian, h - short type: 2 bytes with sign
-        self.rx, self.ry, self.rz = struct.unpack("<hhh", bs)
+        BLE = self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG4) & self.BLE
+        if BLE:
+            read_str = ">hhh"
+        else:
+            # < -little-endian, h - short type: 2 bytes with sign
+            read_str = "<hhh"
+            
+        self.rx, self.ry, self.rz = struct.unpack(read_str, bs)
               
-
-
     def readX(self):
         status = self.bus.read_byte_data(self.ADDRESS, self.STATUS_REG)
         if not status & self.XDA:
@@ -188,14 +197,14 @@ class I3G4250D:
 
     def read_degXYZ(self):
         self.readXYZ()
-        self.x  = self.rx * self.scale
-        self.y  = self.ry * self.scale 
-        self.z  = self.rz * self.scale  
+        self.x  = self.rx * self.sensetivity
+        self.y  = self.ry * self.sensetivity 
+        self.z  = self.rz * self.sensetivity  
 
 
 gyro = I3G4250D()
 gyro.read_degXYZ()
-print(gyro.scale)
+print(gyro.sensetivity)
 print(gyro.x, gyro.y, gyro.z)
 
 
