@@ -194,13 +194,15 @@ class LIS331DLH():
         bs = bytes(data)     
         self.rz = struct.unpack("<h", bs)[0]
 
-    def raw_to_g(self):
+    def read_gXYZ(self):
+        self.readXYZ()
         self.x = self.rx * self.scale_factor
         self.y = self.ry * self.scale_factor
         self.z = self.rz * self.scale_factor
 
 
-    def raw_to_ms(self):
+    def read_ms2XYZ(self):
+        self.readXYZ()
         self.x = self.rx * self.GRAVITY_EARTH * self.scale_factor
         self.y = self.ry * self.GRAVITY_EARTH * self.scale_factor
         self.z = self.rz * self.GRAVITY_EARTH * self.scale_factor
@@ -211,7 +213,6 @@ class LIS331DLH():
 
 # acc = LIS331DLH()
 # acc.hp_filter_setup(acc.hp_400Hz, acc.hp_reference)
-# acc.readXYZ()
-# acc.raw_to_ms()
+# acc.read_ms2XYZ()
 
 # print(acc.x, acc.y, acc.z)

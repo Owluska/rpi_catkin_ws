@@ -71,6 +71,8 @@ class LPS25HB:
     P_OR = 0x20
 
     mB2mmHg = 0.750061682
+    T_SCALE = 1/480
+    T_OFFSET = 42.5
     
     def __init__(self, measure_delta = False):      
         class DR:
@@ -110,6 +112,7 @@ class LPS25HB:
         self.start(self.AVGT_16, self.AVGP_512, self.data_rate, self.mDelta)  
         
         self.pressure = 0.0
+        self.temp = 0.0
         self.dt = 1 / self.data_rate.data_rate
 
     def start(self, temp_averaging, pressure_averaging, data_rate, measure_delta):
@@ -190,6 +193,14 @@ class LPS25HB:
             data = self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG1)
             data |= self.RESET_AZ
             self.bus.write_byte_data(self.ADDRESS, self.CTRL_REG1, data)
+    
+    def readTemperature(self):
+        data = self.bus.read_i2c_block_data(self.ADDRESS,  self.TEMP_OUT_L | 0x80, 2)
+        bs = bytes(data)
+        temp_raw = struct.unpack(">h", bs)[0]
+        self.temp = self.T_OFFSET + temp_raw * self.T_SCALE
+        print(self.temp)
+
         
                
 
@@ -204,3 +215,6 @@ class LPS25HB:
 #     template = "Pressure {:.4f}mBar, {:.4f}mmHg, dt:{:.2f}s".format(bar.pressure, bar.pressure * bar.mB2mmHg, bar.dt)
 #     print(template)
 #     sleep(bar.dt)
+
+# bar = LPS25HB()
+# bar.readTemperature()

@@ -227,10 +227,20 @@ class LIS3MDL:
         self.readX()
         self.readY()
         self.x  = self.rx * self.scale
-        self.y  = self.ry * self.scale 
+        self.y  = self.ry * self.scale
+
+    def read_Temperature(self):
+        data = self.bus.read_i2c_block_data(self.ADDRESS, self.TEMP_OUT_L | 0x80, 2)
+        LSB = 8 
+        bs = bytes(data)
+   
+        temp_raw = struct.unpack("<h", bs)[0]
+        #print(temp_raw * LSB)
+
 
 
 # mag = LIS3MDL()
+# mag.read_Temperature()
  
 # mag.read_gaussXYZ()
 # print(mag.x, mag.y, mag.z)

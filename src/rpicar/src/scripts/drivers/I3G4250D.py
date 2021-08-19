@@ -14,6 +14,9 @@ class I3G4250D:
     CTRL_REG4 = 0x23
     CTRL_REG5 = 0x24
 
+    REFERENCE = 0x25
+    OUT_TEMP = 0x26
+
     STATUS_REG = 0x27
 
     OUT_X_L = 0x28
@@ -121,6 +124,8 @@ class I3G4250D:
         self.ry = 0.0
         self.rz = 0.0
 
+        self.temp = 0.0
+
         self.dt = 1/self.data_rate.data_rate
 
     def start(self, bandwidth, data_rate):
@@ -206,10 +211,18 @@ class I3G4250D:
         self.readXYZ()
         self.x  = self.rx * self.sensetivity
         self.y  = self.ry * self.sensetivity 
-        self.z  = self.rz * self.sensetivity  
+        self.z  = self.rz * self.sensetivity
+    
+    def read_Temp(self):
+        data = self.bus.read_byte_data(self.ADDRESS, self.OUT_TEMP)
+        data = int(data)
+        self.temp = data 
 
 
-# gyro = I3G4250D()
+#gyro = I3G4250D()
 # gyro.read_degXYZ()
-#print(gyro.sensetivity)
-# print(gyro.x, gyro.y, gyro.z, gyro.dt)
+# # print(gyro.x, gyro.y, gyro.z, gyro.dt)
+#for i in range(10):
+    gyro.read_Temp()
+    print(gyro.temp)
+    sleep(gyro.dt)

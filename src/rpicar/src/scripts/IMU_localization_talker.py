@@ -14,6 +14,7 @@ from ahrs import Quaternion
 from drivers.LIS331DLH import LIS331DLH as Accelerometer
 from drivers.I3G4250D import I3G4250D as Gyroscope
 from drivers.LIS3MDL import LIS3MDL as Magnetometer
+from drivers.LPS25HB import LPS25HB as Barometer
 # from filterpy.kalman import ExtendedKalmanFilter
 
 from time import sleep, time
@@ -26,21 +27,27 @@ class imu_talker():
         #                               1.7522125244140625,-2.4026947021484375,-0.3843841552734375,
         #                              [145.3125],[35.3759765625],[8.349609375]], dtype = 'object')
         # self.imu = mpu9250()
+        self.f = Accelerometer()
+        self.f.hp_filter_setup(acc.hp_400Hz, acc.hp_reference)
+        self.w = Gyroscope()
+        self.m = Magnetometer()
+        self.p = Barometer()
+        
         self.cf = open(cf_path, 'r')
         
-        self.ax = 0.00
-        self.ay = 0.00
-        self.az = 10.00
+        # self.ax = 0.00
+        # self.ay = 0.00
+        # self.az = 10.00
         
-        self.gx = 0.00
-        self.gy = 0.00
-        self.gz = 0.00
+        # self.gx = 0.00
+        # self.gy = 0.00
+        # self.gz = 0.00
         
-        self.mx = 0.00
-        self.my = 0.00
-        self.mz = 0.00
+        # self.mx = 0.00
+        # self.my = 0.00
+        # self.mz = 0.00
 
-        self.temp = 0.0
+        #self.temp = 0.0
 
         self.dt = 0.00
         self.t = 0.00
@@ -108,49 +115,63 @@ class imu_talker():
         self.kf.var_m = self.var_m
         self.kf.g = np.array([0, 0, -self.g]) 
 
-    def get_mpu9250_data(self):
-            self.ax,self.ay,self.az,self.gx,self.gy,self.gz = self.imu.mpu6050_conv() # read and convert mpu6050 data
-            self.mx,self.my,self.mz = self.imu.AK8963_conv()
-            return np.array([self.ax,self.ay,self.az,self.gx,self.gy,self.gz,self.mx,self.my,self.mz])
+    # def get_mpu9250_data(self):
+    #         self.ax,self.ay,self.az,self.gx,self.gy,self.gz = self.imu.mpu6050_conv() # read and convert mpu6050 data
+    #         self.mx,self.my,self.mz = self.imu.AK8963_conv()
+    #         return np.array([self.ax,self.ay,self.az,self.gx,self.gy,self.gz,self.mx,self.my,self.mz])
         
-    def calibrated_mpu9250(self):
-        raw  = self.get_mpu9250_data()
+    # def calibrated_mpu9250(self):
+    #     raw  = self.get_mpu9250_data()
          
-        mpu_cal = np.zeros_like(raw)
-        cal_rot_indicies = [[6,7],[7,8],[6,8]] # heading indices
-        for i in range(3):   
-            mpu_cal[i] = self.offsets[i][0]*raw[i]+ self.offsets[i][1]
-        for i in range(3,6):
-            mpu_cal[i] = raw[i] - self.offsets[i]
-        for i in range(6,9):
-            j = i-6
-            mpu_cal[i] = raw[i] - self.offsets[cal_rot_indicies[j][0]]
-        self.ax, self.ay, self.az, self.gx, self.gy, self.gz, self.mx, self.my, self.mz = mpu_cal
-        return mpu_cal
+    #     mpu_cal = np.zeros_like(raw)
+    #     cal_rot_indicies = [[6,7],[7,8],[6,8]] # heading indices
+    #     for i in range(3):   
+    #         mpu_cal[i] = self.offsets[i][0]*raw[i]+ self.offsets[i][1]
+    #     for i in range(3,6):
+    #         mpu_cal[i] = raw[i] - self.offsets[i]
+    #     for i in range(6,9):
+    #         j = i-6
+    #         mpu_cal[i] = raw[i] - self.offsets[cal_rot_indicies[j][0]]
+    #     self.ax, self.ay, self.az, self.gx, self.gy, self.gz, self.mx, self.my, self.mz = mpu_cal
+    #     return mpu_cal
+    
+    def read_IMU_data(self):
+        self.f.read_ms2XYZ()
+        sleep(f.dt)
+
+        self.w.read_degXYZ()
+        sleep(w.dt)
+
+        self.m.read_gaussXYZ()
+        sleep(m.dt)
+
+        self.p.readTemperature()
+        sleep(p.dt)
+
+
     
     def sensor_data_to_AHRS(self):
-        self.ax *= self.g
-        self.ay *= self.g
-        self.az *= self.g
+        # self.ax *= self.g
+        # self.ay *= self.g
+        # self.az *= self.g
 
-        self.gx *= self.D2R
-        self.gy *= self.D2R
-        self.gz *= self.D2R
+        # self.gx *= self.D2R
+        # self.gy *= self.D2R
+        # self.gz *= self.D2R
 
-        acc_data = np.array([[self.ax, self.ay, self.az]])
+        acc_data = np.array([[self.f.x, self.f.y, self.f.z]])
         self.acc_data = np.append(self.acc_data, acc_data, axis = 0)
 
-        gyro_data = np.array([[self.gx, self.gy, self.gz]])
+        gyro_data = np.array([[self.w.x, self.w.y, self.w.z]])
         self.gyro_data = np.append(self.gyro_data, gyro_data, axis = 0)
 
-        mag_data = np.array([[self.mx, self.my, self.mz]])
+        mag_data = np.array([[self.m.x, self.m.y, self.m.z]])
         self.mag_data = np.append(self.mag_data, mag_data, axis = 0)
     
     def read_sensor_data(self):
         try:
-            _ = self.calibrated_mpu9250()
+            self.read_IMU_data()
             self.sensor_data_to_AHRS()
-            self.temp = self.imu.read_temp()
         except Exception as e:
             rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
         
@@ -162,28 +183,28 @@ class imu_talker():
         #publish imu acceleration and gyro
         self.imu_msg.header.stamp = rospy.Time.now()
         self.imu_msg.header.seq = self.seq
-        self.imu_msg.angular_velocity.x  = self.gx
-        self.imu_msg.angular_velocity.y = self.gy
-        self.imu_msg.angular_velocity.z = self.gz
+        self.imu_msg.angular_velocity.x  = self.w.x
+        self.imu_msg.angular_velocity.y = self.w.y
+        self.imu_msg.angular_velocity.z = self.w.z
         
-        self.imu_msg.linear_acceleration.x = self.ax
-        self.imu_msg.linear_acceleration.y = self.ay
-        self.imu_msg.linear_acceleration.z = self.az
+        self.imu_msg.linear_acceleration.x = self.f.x
+        self.imu_msg.linear_acceleration.y = self.f.y
+        self.imu_msg.linear_acceleration.z = self.f.z
         self.pub_raw.publish(self.imu_msg)
         
         #publish magnetometer
         self.mag_msg.header.stamp = rospy.Time.now()
         self.mag_msg.header.seq = self.seq
-        self.mag_msg.magnetic_field.x  = self.mx
-        self.mag_msg.magnetic_field.y = self.my
-        self.mag_msg.magnetic_field.z = self.mz
+        self.mag_msg.magnetic_field.x  = self.m.x
+        self.mag_msg.magnetic_field.y = self.m.y
+        self.mag_msg.magnetic_field.z = self.m.z
         
         self.pub_mag.publish(self.mag_msg)
         
         #publish temperature
         self.temp_msg.header.stamp = rospy.Time.now()
         self.temp_msg.header.seq = self.seq
-        self.temp_msg.temperature = self.temp
+        self.temp_msg.temperature = self.p.temp
         
         self.pub_temp.publish(self.temp_msg)
 

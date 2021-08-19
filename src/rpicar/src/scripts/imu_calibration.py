@@ -226,8 +226,7 @@ gyro = Gyroscope()
 mag = Magnetometer()
 
 def get_acc_data():   
-    acc.readXYZ()
-    acc.raw_to_ms()
+    acc.read_ms2XYZ()
     sleep(acc.dt)
     return acc.x, acc.y, acc.z
  
