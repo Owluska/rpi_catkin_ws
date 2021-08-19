@@ -54,38 +54,42 @@ class LIS331DLH():
 
     def __init__(self, channel = 0):
         class data_range:
-            def __init__(self, fs0, fs1, value, name):
-                self.FS0 = fs0
-                self.FS1 = fs1
+            def __init__(self, name, value, bits = 0x00):
+                self.bits = bits
                 self.value = value
                 self.name = name
                 self.scale = self.value *  2/ (2 ** 16)
 
-        
+        class filter_modes:
+            def __init__(self, name, bits = 0x00):
+                self.name = name
+                self.bits = bits
+
         class filter_freq:
-            def __init__(self, name, coef, bit_value, data_rate):
+            def __init__(self, name, coef, data_rate, bits = 0x00):
                 self.name = name
                 self.coef = coef
-                self.bits = bit_value
+                self.bits = bits
                 self.freq = data_rate / self.coef  
 
         class data_rate:
-            def __init__(self, name, value, bits):
+            def __init__(self, name, value, bits = 0x00):
                 self.name = name
                 self.value = value
                 self.bits = bits
         
-        self.range_2G = data_range(    0x00,     0x00, 2, '2G')
-        self.range_4G = data_range(    0x00, self.FS0, 4, '4G')
-        self.range_8G = data_range(self.FS1, self.FS0, 8, '8G')
+        self.range_2G = data_range('2G', 2)
+        self.range_4G = data_range('4G', 4, self.FS0)
+        self.range_8G = data_range('8G', 8, self.FS1 |self.FS0)
 
-        self.rate_50 = data_rate('50_Hz', 50, 0x00)
+        self.rate_50 = data_rate('50_Hz', 50)
         self.rate_100 = data_rate('100_Hz', 100, self.DR0)
         self.rate_400 = data_rate('400_Hz', 400, self.DR1)
         self.rate_1000 = data_rate('1000_Hz', 1000, self.DR0 | self.DR1)
 
 
-        self.hp_modes = {'reference':self.HPM0, 'normal':self.HPM1}
+        self.hp_reference = filter_modes('reference', self.HPM0)
+        self.hp_normal = filter_modes('normal', self.HPM1)
         # self.data_rate = {'50Hz': 0x00, '100Hz': self.DR0, '400Hz': self.DR1, '1000Hz': self.DR0, }
         # self.hp_freqs = {'50Hz':0x00, 'k100':self.HPCF0, 'k200':self.HPCF1, 'k400':self.HPCF1|self.HPCF0}
         
@@ -93,7 +97,7 @@ class LIS331DLH():
         self.scale_factor = self.range_2G.scale 
         
         self.setup(self.rate_1000)
-        self.hp_freq = filter_freq('to_400', 400, self.HPCF1|self.HPCF0, self.rate_1000.value)
+        self.hp_400Hz = filter_freq('to_400', 400, self.rate_1000.value, self.HPCF1|self.HPCF0)
 
         self.x = 0.0
         self.y = 0.0
@@ -116,14 +120,14 @@ class LIS331DLH():
         if block_reading:
             self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG4, self.BDU)
     
-    def hp_filter_setup(self, freq, mode,enable = True):
+    def hp_filter_setup(self, freq, mode, enable = True):
         data = self.bus.read_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG2)
         if enable:
             data |= self.FDS
         else:
             data &= ~self.FDS & 0xFF
             return        
-        data |= mode | freq 
+        data |= mode.bits | freq.bits 
         self.bus.write_byte_data(self.SLAVE_ADDRESS, self.CTRL_REG2, data)
     
     def set_range(self, data_range):         
@@ -205,9 +209,9 @@ class LIS331DLH():
  
 
 
-acc = LIS331DLH()
-acc.hp_filter_setup(acc.hp_freq.bits, acc.hp_modes['reference'])
-acc.readXYZ()
-acc.raw_to_ms()
+# acc = LIS331DLH()
+# acc.hp_filter_setup(acc.hp_400Hz, acc.hp_reference)
+# acc.readXYZ()
+# acc.raw_to_ms()
 
-print(acc.x, acc.y, acc.z)
+# print(acc.x, acc.y, acc.z)

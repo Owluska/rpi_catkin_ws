@@ -104,7 +104,9 @@ class LIS3MDL:
         self.DR_12GAUSS = DR("12GAUSS", 12, self.FS1)
         self.DR_16GAUSS = DR("16GAUSS", 16, self.FS1|self.FS0)
         
-        self.setup(self.ODR_1000)
+        self.data_rate = self.ODR_1000
+        self.setup(self.data_rate)
+        sleep(.5)
         self.scale = 2 * 4 / 2 ** 16
         self.set_range(self.DR_4GAUSS)
         self.set_Z_axis_operating_mode(self.OMZ_UHP)
@@ -116,6 +118,7 @@ class LIS3MDL:
 
         self.x, self.y, self.z = 0,0,0
         self.rx, self.ry, self.rz = 0,0,0
+        self.dt = 1/self.data_rate.ODR
 
 
     def setup(self, odr, block_reading = True, temp_sensor = True, big_endian = False, fast_read = False):
@@ -227,7 +230,7 @@ class LIS3MDL:
         self.y  = self.ry * self.scale 
 
 
-mag = LIS3MDL()
+# mag = LIS3MDL()
  
-mag.read_gaussXY()
-print(mag.x, mag.y)
+# mag.read_gaussXYZ()
+# print(mag.x, mag.y, mag.z)

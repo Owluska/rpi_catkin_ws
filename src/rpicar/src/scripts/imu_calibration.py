@@ -1,21 +1,23 @@
 #! /usr/bin/env python3
+##%%
 import time
 import json
 import numpy as np
 from scipy.optimize import curve_fit
 from drivers.mpu9250_lib import mpu9250
+from time import sleep
 
 
 
 class mpu_calibration:
-    path = 'src/rpicar/src/scripts/data/'   
+    path = '/home/pi/catkin_ws/src/rpicar/src/scripts/data/'   
     def __init__(self, name = 'imu_offsets.txt', open_option = 'w'):
         self.name = name    
         self.cf = open(self.path+self.name, open_option)
 
-        self.mpu = mpu9250()
-        self.mpu.MPU6050_start()
-        self.mpu.AK8963_start()
+        # self.mpu = mpu9250()
+        # self.mpu.MPU6050_start()
+        # self.mpu.AK8963_start()
 
         self.data_size = 500
 
@@ -50,10 +52,14 @@ class mpu_calibration:
         gyro_data = np.zeros((self.data_size,3))
         for i in range(self.data_size):
             try:
-                gyro = np.array(gyro_func)
-                self.gyro_data[i] = gyro
+                raw_data = np.array(gyro_func())
+                #print(raw_data)
+                gyro_data[i] = raw_data
                 attempts = 0
-            except Exception:
+            except Exception as e:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(e).__name__, e.args)
+                print(message)
                 if attempts > 10:
                     print("Sensor is probably not connected! Returning..")
                     return -1
@@ -81,7 +87,7 @@ class mpu_calibration:
 
                 for k in range(self.data_size):
                     try:
-                        acc_data[k] = np.array(acc_func)
+                        acc_data[k] = np.array(acc_func())
                         #self.raw_data[k, 3:6] = acc
                         #print(acc)
                         
@@ -128,7 +134,7 @@ class mpu_calibration:
 
             while True:
                 try:
-                    mags = np.array(mag_func).reshape((1,3)) # read and convert AK8963 magnetometer data
+                    mags = np.array(mag_func()).reshape((1,3)) # read and convert AK8963 magnetometer data
                     mag_data = np.append(mag_data, mags, axis = 0)
                 except (Exception, KeyboardInterrupt) as e:  
                     if type(e).__name__ == 'KeyboardInterrupt':
@@ -156,8 +162,6 @@ class mpu_calibration:
             self.mag_coeffs[0, i] = offset
             self.mag_coeffs[1, i] = slope
                
-
-            
 
     def data_to_json(self, keys, data):    
         # l = len(keys)
@@ -204,19 +208,36 @@ class mpu_calibration:
         self.cf.close()
 
 from drivers.multiplexer import PCA9547
-from drivers.LIS331DLH import LIS331DLH
+from drivers.LIS331DLH import LIS331DLH as Accelerometer
+from drivers.I3G4250D import I3G4250D as Gyroscope
+from drivers.LIS3MDL import LIS3MDL as Magnetometer
 
-acc = LIS331DLH()
-acc.hp_filter_setup(acc.hp_freq.bits, acc.hp_modes['reference'])
+acc = Accelerometer()
+acc.hp_filter_setup(acc.hp_400Hz, acc.hp_reference)
 
-def get_acc_data(acc):   
+gyro = Gyroscope()
+
+mag = Magnetometer()
+
+def get_acc_data():   
     acc.readXYZ()
     acc.raw_to_ms()
-    return acc.x, acc.y, acc.z 
+    sleep(acc.dt)
+    return acc.x, acc.y, acc.z
+ 
+def get_gyro_data():
+    gyro.read_degXYZ()
+    sleep(gyro.dt)
+    return gyro.x, gyro.y, gyro.z
 
-pca = PCA9547()
+def get_mag_data():
+    mag.read_gaussXYZ()
+    sleep(mag.dt)
+    return mag.x, mag.y, mag.z
+
+# pca = PCA9547()
 
 cal = mpu_calibration(open_option='a')
-cal.calibrate_all(get_acc_data)
+cal.calibrate_all(get_gyro_data, get_acc_data, get_mag_data)
 print(cal.dict)
 
