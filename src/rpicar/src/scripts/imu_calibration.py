@@ -6,8 +6,9 @@ import numpy as np
 from scipy.optimize import curve_fit
 from drivers.mpu9250_lib import mpu9250
 from time import sleep
-
-
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 class mpu_calibration:
     path = '/home/pi/catkin_ws/src/rpicar/src/scripts/data/'   
@@ -33,14 +34,15 @@ class mpu_calibration:
                      'mx_off', 'my_off', 'mz_off']
         self.json_str = ""
         self.dict = {}
+        self.plot = False
 
-    def get_gyro(self, func):
-        _,_,_,wx,wy,wz = self.mpu.mpu6050_conv() # read and convert gyro data
-        return wx,wy,wz
+    # def get_gyro(self):
+    #     _,_,_,wx,wy,wz = self.mpu.mpu6050_conv() # read and convert gyro data
+    #     return wx,wy,wz
 
-    def get_acc(self):
-        ax,ay,az,_,_,_ = self.mpu.mpu6050_conv() # read and convert acc data
-        return ax,ay,az
+    # def get_acc(self):
+    #     ax,ay,az,_,_,_ = self.mpu.mpu6050_conv() # read and convert acc data
+    #     return ax,ay,az
 
     def acc_fit_finc(self, x, k, b):
         y = k * x + b
@@ -65,7 +67,11 @@ class mpu_calibration:
                     return -1
                 attempts += 1
                 continue 
-        
+        if self.plot:
+            #print(gyro_data)
+            plt.plot(gyro_data)
+            plt.title("Gyro")
+            plt.grid() 
         self.gyro_offsets = np.mean(gyro_data, axis = 0)
         return 0
 
@@ -236,8 +242,21 @@ def get_mag_data():
     return mag.x, mag.y, mag.z
 
 # pca = PCA9547()
+calibrate = False
+if calibrate:
+    cal = mpu_calibration(open_option='a')
+    cal.plot = False
+    cal.calibrate_all(get_gyro_data, get_acc_data, get_mag_data)
+    print(cal.dict)
 
-cal = mpu_calibration(open_option='a')
-cal.calibrate_all(get_gyro_data, get_acc_data, get_mag_data)
-print(cal.dict)
-
+read = False
+if read:
+    cal = mpu_calibration(open_option='r')
+    data_s = cal.cf.read()
+    #get index of last measurment 
+    start_i = data_s[::-1].find("{") + 1
+    #delete other measurments
+    data_s = data_s[-start_i:]
+    #data to dictonary
+    d =  json.loads(data_s)
+    print(d['gx_off'])

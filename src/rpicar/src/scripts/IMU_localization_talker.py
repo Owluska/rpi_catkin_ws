@@ -4,24 +4,29 @@ import sys
 from sensor_msgs.msg import Imu, MagneticField, Temperature
 
 
-from drivers.mpu9250_lib import mpu9250
+# from drivers.mpu9250_lib import mpu9250
 from library.es_ekf import ekf
 import numpy as np
 import math
 import ahrs
 from ahrs import Quaternion
+
+from drivers.LIS331DLH import LIS331DLH as Accelerometer
+from drivers.I3G4250D import I3G4250D as Gyroscope
+from drivers.LIS3MDL import LIS3MDL as Magnetometer
 # from filterpy.kalman import ExtendedKalmanFilter
 
 from time import sleep, time
 
 class imu_talker():
-    def __init__(self):
-        self.offsets = np.array([[0.9964611434970413, -0.1358959565043638],
-                                     [0.998331379179552,0.06877502271143854],
-                                     [-0.9860600182267061,-0.3923817524528095],
-                                      1.7522125244140625,-2.4026947021484375,-0.3843841552734375,
-                                     [145.3125],[35.3759765625],[8.349609375]], dtype = 'object')
-        self.imu = mpu9250()
+    def __init__(self, cf_path):
+        # self.offsets = np.array([[0.9964611434970413, -0.1358959565043638],
+        #                              [0.998331379179552,0.06877502271143854],
+        #                              [-0.9860600182267061,-0.3923817524528095],
+        #                               1.7522125244140625,-2.4026947021484375,-0.3843841552734375,
+        #                              [145.3125],[35.3759765625],[8.349609375]], dtype = 'object')
+        # self.imu = mpu9250()
+        self.cf = open(cf_path, 'r')
         
         self.ax = 0.00
         self.ay = 0.00
@@ -241,8 +246,12 @@ class imu_talker():
             #self.loop_rate.sleep()
 
 def main(args):
-    rospy.init_node('imu_talker', anonymous = True)   
-    talker = imu_talker()
+    rospy.init_node('imu_talker', anonymous = True)
+    path = '/home/pi/catkin_ws/src/rpicar/src/scripts/data/'
+    name = 'imu_offsets.txt'    
+    path += name
+    
+    talker = imu_talker(path)
     talker.start()    
 
 if __name__ == '__main__':
