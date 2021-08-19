@@ -69,8 +69,10 @@ class LPS25HB:
     P_DA = 0x02
     T_OR = 0x10
     P_OR = 0x20
+
+    mB2mmHg = 0.750061682
     
-    def __init__(self):      
+    def __init__(self, measure_delta = False):      
         class DR:
             def __init__(self, name, data_rate, bits = 0x00):
                 self.name = name
@@ -103,17 +105,17 @@ class LPS25HB:
         self.scale = 1/ 2 ** 12
         # self.avgt = 8
         # self.avgp = 8
-
-        self.start(self.AVGT_16, self.AVGP_512, self.DR_25)
-        self.set_delta_measurment(on = False)       
-
+        self.mDelta = measure_delta
+        self.data_rate = self.DR_25
+        self.start(self.AVGT_16, self.AVGP_512, self.data_rate, self.mDelta)  
         
         self.pressure = 0.0
+        self.dt = 1 / self.data_rate.data_rate
 
-    def start(self, temp_averaging, pressure_averaging, data_rate):
+    def start(self, temp_averaging, pressure_averaging, data_rate, measure_delta):
         self.setup_RES_CONF(temp_averaging, pressure_averaging)
-        self.setup_CTRL_REG1(data_rate)
-        self.setup_CTRL_REG2()
+        self.setup_CTRL_REG1(data_rate, reset_autozero = not measure_delta)
+        self.setup_CTRL_REG2(auto_zero = measure_delta)
 
     
     def setup_RES_CONF(self, temp_averaging, pressure_averaging):
@@ -128,7 +130,7 @@ class LPS25HB:
         # self.avgt = temp_averaging.avg
         # self.avgp = pressure_averaging.avg
 
-    def setup_CTRL_REG1(self, data_rate, power_down_mode = False, block_data_reading = True, autozero = False):
+    def setup_CTRL_REG1(self, data_rate, power_down_mode = False, block_data_reading = True, reset_autozero = False):
         data = data_rate.bits
         if not power_down_mode:
             data |= self.PD
@@ -136,7 +138,7 @@ class LPS25HB:
         if block_data_reading:
             data |= self.BDU
 
-        if autozero:
+        if reset_autozero:
             data |= self.AUTO_ZERO
         self.bus.write_byte_data(self.ADDRESS, self.CTRL_REG1, data)
         
@@ -167,27 +169,38 @@ class LPS25HB:
             return
         
         data = self.bus.read_i2c_block_data(self.ADDRESS,  self.PRESS_OUT_XL | 0x80, 3) 
+        #print(data)
         negative = data[2] & 0x80
-        
-        print(data)
+        #data[2] &= 0x7F
+        #print(negative)      
         if negative:
-            data[2] *= -1
+            data[2] -= 255
         
         p = data[2] << 16 | data[1] << 8 | data[0]
         self.pressure = p * self.scale
+        if negative:
+            self.pressure *= -1
 
-    def set_delta_measurment(self, on = True):
-        data = self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG2)
+    def set_delta_measurment(self, on = True):      
         if on:
+            data = self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG2)
             data |= self.AUTO_ZERO
-        else:
-            data &= ~self.AUTO_ZERO & 0xFF
-        self.bus.write_byte_data(self.ADDRESS, self.CTRL_REG2, data)
-        print(self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG2))
+            self.bus.write_byte_data(self.ADDRESS, self.CTRL_REG2, data)
+        else:               
+            data = self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG1)
+            data |= self.RESET_AZ
+            self.bus.write_byte_data(self.ADDRESS, self.CTRL_REG1, data)
+        
                
 
 
-bar = LPS25HB()
-bar.readPressure()
-# print(gyro.sensetivity)
-print(bar.pressure)
+# bar = LPS25HB()
+# for i in range(20):
+#     #print(bar.mDelta)
+#     if i == 10:
+#         bar.set_delta_measurment(on=True)
+#         sleep(.5)
+#     bar.readPressure()
+#     template = "Pressure {:.4f}mBar, {:.4f}mmHg, dt:{:.2f}s".format(bar.pressure, bar.pressure * bar.mB2mmHg, bar.dt)
+#     print(template)
+#     sleep(bar.dt)
