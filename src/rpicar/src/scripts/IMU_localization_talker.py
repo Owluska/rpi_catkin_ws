@@ -5,12 +5,13 @@ from sensor_msgs.msg import Imu, MagneticField, Temperature
 
 
 # from drivers.mpu9250_lib import mpu9250
-from drivers.es_ekf import ekf
-import numpy as np
 import math
 import ahrs
+import json
+import numpy as np
 from ahrs import Quaternion
 
+from drivers.es_ekf import ekf
 from drivers.LIS331DLH import LIS331DLH as Accelerometer
 from drivers.I3G4250D import I3G4250D as Gyroscope
 from drivers.LIS3MDL import LIS3MDL as Magnetometer
@@ -32,8 +33,10 @@ class imu_talker():
         self.w = Gyroscope()
         self.m = Magnetometer()
         self.p = Barometer()
-        
+        self.imu_coefs = {}
         self.cf = open(cf_path, 'r')
+        self.read_IMU_calibration()
+        print(self.imu_coefs)
         
         # self.ax = 0.00
         # self.ay = 0.00
@@ -70,7 +73,7 @@ class imu_talker():
         self.gyro_data = np.array([[.0, .0, .0]])
         self.mag_data = np.array([[.0,.0,.0]])
         self.quat_data = np.array([[1.0, .0, .0, 0.0]])
-        self.use_magnetometer = False
+        self.use_magnetometer = True
         
         if self.use_magnetometer:  
             self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data, mag = self.mag_data)
@@ -136,6 +139,15 @@ class imu_talker():
     #     self.ax, self.ay, self.az, self.gx, self.gy, self.gz, self.mx, self.my, self.mz = mpu_cal
     #     return mpu_cal
     
+    def read_IMU_calibration(self):
+        data_s = self.cf.read()
+        #get index of last measurment 
+        start_i = data_s[::-1].find("{") + 1
+        #delete other measurments
+        data_s = data_s[-start_i:]
+        #data to dictonary
+        self.imu_coefs =  json.loads(data_s)
+    
     def read_IMU_data(self):
         self.f.read_ms2XYZ()
         sleep(self.f.dt)
@@ -154,8 +166,23 @@ class imu_talker():
         self.av_temperature = self.w.temp + self.p.temp + self.m.temp
         self.av_temperature /= 3
 
-
-
+    def read_IMU_calibrated_data(self):
+        self.read_IMU_data()
+        #print(self.w.x, self.w.y, self.w.z, self.f.x, self.f.y, self.f.z, self.m.x, self.m.y, self.m.z)
+        data_array = [self.w.x, self.w.y, self.w.z,
+                               self.f.x, self.f.y, self.f.z,
+                               self.m.x, self.m.y, self.m.z]
+        coefs = self.imu_coefs
+        coefs = {k:float(v) for k, v in coefs.items()}
+        keys = list(coefs.keys())
+        #print(len(keys))
+        self.w.x, self.w.y, self.w.z = [d - coefs[k] for d, k in zip(data_array[:3], keys[:3])]
+        self.f.x, self.f.y, self.f.z = [d * coefs[ks] -  coefs[koff] 
+                                        for d, ks, koff in zip(data_array[3:6], keys[3:6], keys[6:9])]
+        self.f.z += self.f.GRAVITY_EARTH        
+        self.m.x, self.m.y, self.m.z = [d * coefs[ks] -  coefs[koff] 
+                                        for d, ks, koff in zip(data_array[6:], keys[9:12], keys[12:])]
+        #print(self.w.x, self.w.y, self.w.z, self.f.x, self.f.y, self.f.z, self.m.x, self.m.y, self.m.z)
     
     def sensor_data_to_AHRS(self):
         # self.ax *= self.g
@@ -177,7 +204,7 @@ class imu_talker():
     
     def read_sensor_data(self):
         try:
-            self.read_IMU_data()
+            self.read_IMU_calibrated_data()
             self.sensor_data_to_AHRS()
         except Exception as e:
             rospy.loginfo("An exception of type {} occured. Arguments:\n{}".format(type(e).__name__, e.args))
