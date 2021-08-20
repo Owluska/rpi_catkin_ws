@@ -61,6 +61,8 @@ class LIS3MDL:
     ZOR = 0x40
     ZYXOR = 0x80
     
+    T_ZERO_VALUE = 25.0
+    T_LSB = 8
     def __init__(self):
         class ODR:
             def __init__(self, name, output_data_rate, bits=0x00):
@@ -105,11 +107,15 @@ class LIS3MDL:
         self.DR_16GAUSS = DR("16GAUSS", 16, self.FS1|self.FS0)
         
         self.data_rate = self.ODR_1000
-        self.setup(self.data_rate)
-        sleep(.5)
         self.scale = 2 * 4 / 2 ** 16
+        
+        sleep(.05)
+        
+        self.setup(self.data_rate)
         self.set_range(self.DR_4GAUSS)
         self.set_Z_axis_operating_mode(self.OMZ_UHP)
+
+        sleep(.05)
 
         # print(self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG1))
         # print(self.bus.read_byte_data(self.ADDRESS, self.CTRL_REG2))
@@ -118,6 +124,7 @@ class LIS3MDL:
 
         self.x, self.y, self.z = 0,0,0
         self.rx, self.ry, self.rz = 0,0,0
+        self.temp = 0.0
         self.dt = 1/self.data_rate.ODR
 
 
@@ -231,11 +238,10 @@ class LIS3MDL:
 
     def read_Temperature(self):
         data = self.bus.read_i2c_block_data(self.ADDRESS, self.TEMP_OUT_L | 0x80, 2)
-        LSB = 8 
         bs = bytes(data)
-   
+
         temp_raw = struct.unpack("<h", bs)[0]
-        #print(temp_raw * LSB)
+        self.temp = temp_raw * 1/self.T_LSB + self.T_ZERO_VALUE
 
 
 

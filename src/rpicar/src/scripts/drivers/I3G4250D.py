@@ -214,15 +214,13 @@ class I3G4250D:
         self.z  = self.rz * self.sensetivity
     
     def read_Temp(self):
-        data = self.bus.read_byte_data(self.ADDRESS, self.OUT_TEMP)
-        data = int(data)
-        self.temp = data 
+        data = [self.bus.read_byte_data(self.ADDRESS, self.OUT_TEMP)]
+        bs = bytes(data)
+        self.temp = struct.unpack("<b", bs)[0]
 
 
 #gyro = I3G4250D()
 # gyro.read_degXYZ()
 # # print(gyro.x, gyro.y, gyro.z, gyro.dt)
-#for i in range(10):
-    gyro.read_Temp()
-    print(gyro.temp)
-    sleep(gyro.dt)
+gyro = I3G4250D()
+gyro.read_Temp()
