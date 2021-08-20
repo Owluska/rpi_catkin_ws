@@ -5,7 +5,7 @@ from sensor_msgs.msg import Imu, MagneticField, Temperature
 
 
 # from drivers.mpu9250_lib import mpu9250
-from library.es_ekf import ekf
+from drivers.es_ekf import ekf
 import numpy as np
 import math
 import ahrs
@@ -28,7 +28,7 @@ class imu_talker():
         #                              [145.3125],[35.3759765625],[8.349609375]], dtype = 'object')
         # self.imu = mpu9250()
         self.f = Accelerometer()
-        self.f.hp_filter_setup(acc.hp_400Hz, acc.hp_reference)
+        self.f.hp_filter_setup(self.f.hp_400Hz, self.f.hp_reference)
         self.w = Gyroscope()
         self.m = Magnetometer()
         self.p = Barometer()
@@ -51,10 +51,11 @@ class imu_talker():
 
         self.dt = 0.00
         self.t = 0.00
+        self.av_temperature = 0.0
 
-        self.acc_data = np.array([self.ax, self.ay, self.az])
-        self.gyro_data = np.array([self.gx, self.gy, self.gz]) 
-        self.t_step = 0.03  
+        self.acc_data = np.array([self.f.x, self.f.y, self.f.z])
+        self.gyro_data = np.array([self.w.x, self.w.y, self.w.z]) 
+        self.t_step = self.w.dt + self.f.dt + self.m.dt + self.p.dt
         
         self.isMoving = False 
         
@@ -137,16 +138,22 @@ class imu_talker():
     
     def read_IMU_data(self):
         self.f.read_ms2XYZ()
-        sleep(f.dt)
+        sleep(self.f.dt)
 
         self.w.read_degXYZ()
-        sleep(w.dt)
+        self.w.read_Temperature()
+        sleep(self.w.dt)
 
         self.m.read_gaussXYZ()
-        sleep(m.dt)
+        self.m.read_Temperature()
+        sleep(self.m.dt)
 
-        self.p.readTemperature()
-        sleep(p.dt)
+        self.p.read_Temperature()
+        sleep(self.p.dt)
+
+        self.av_temperature = self.w.temp + self.p.temp + self.m.temp
+        self.av_temperature /= 3
+
 
 
     
@@ -158,7 +165,7 @@ class imu_talker():
         # self.gx *= self.D2R
         # self.gy *= self.D2R
         # self.gz *= self.D2R
-
+        #print(self.f.x, self.f.y, self.f.z)
         acc_data = np.array([[self.f.x, self.f.y, self.f.z]])
         self.acc_data = np.append(self.acc_data, acc_data, axis = 0)
 
@@ -241,6 +248,9 @@ class imu_talker():
     def start(self):
         tt = time()
         self.print = True
+        # print once in a second
+        n =  int(1 /(self.t_step))
+        #print(n, self.t_step)
         while not rospy.is_shutdown():
             self.dt = time() - tt
             tt = time()
@@ -257,12 +267,12 @@ class imu_talker():
             #self.get_position()           
             #rospy.set_param("position", self.position)
             
-            if self.t % 1 <= 0.15 and self.print:
+            if self.seq % n == 0 and self.print:
                 data = self.orientation
                 template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, *data.values())#*data.values())   
                 print(template)
 
-            sleep(self.t_step)
+            #sleep(self.t_step)
             self.seq += 1
             #self.loop_rate.sleep()
 

@@ -194,7 +194,7 @@ class LPS25HB:
             data |= self.RESET_AZ
             self.bus.write_byte_data(self.ADDRESS, self.CTRL_REG1, data)
     
-    def readTemperature(self):
+    def read_Temperature(self):
         data = self.bus.read_i2c_block_data(self.ADDRESS,  self.TEMP_OUT_L | 0x80, 2)
         bs = bytes(data)
         temp_raw = struct.unpack("<h", bs)[0]

@@ -93,19 +93,16 @@ class LIS331DLH():
         # self.data_rate = {'50Hz': 0x00, '100Hz': self.DR0, '400Hz': self.DR1, '1000Hz': self.DR0, }
         # self.hp_freqs = {'50Hz':0x00, 'k100':self.HPCF0, 'k200':self.HPCF1, 'k400':self.HPCF1|self.HPCF0}
         
+        self.data_rate = self.rate_1000
         self.bus = smbus.SMBus(1) # start comm with i2c bus
         self.scale_factor = self.range_2G.scale 
         
-        self.setup(self.rate_1000)
+        self.setup(self.data_rate)
         self.hp_400Hz = filter_freq('to_400', 400, self.rate_1000.value, self.HPCF1|self.HPCF0)
 
-        self.x = 0.0
-        self.y = 0.0
-        self.z = 0.0
-
-        self.rx = 0.0
-        self.ry = 0.0
-        self.rz = 0.0
+        self.x, self.y, self.z = 0,0,0
+        self.rx, self.ry, self.rz = 0,0,0
+        self.dt = 1 / self.data_rate.value
 
     
     def setup(self, data_rate, block_reading = True):
