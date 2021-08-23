@@ -57,6 +57,7 @@ class us_mvmnt():
 
         self.errors_dic = {"ob_left": 1, "ob_right":2, "ob_center":3, "undervoltage":4, "none":0}
         self.state_status = 0
+        self.center_angle = 0.0
         #self.car_init()
     
 
@@ -152,19 +153,19 @@ class us_mvmnt():
         
     
     
-    def straight_moving(self, velocity = 60, backward = True, angle_error = 15, P = 1.0):
+    def straight_moving(self, velocity = 60, backward = True, angle_error = 5, P = 0.8):
         da = 0
         if self.yaw == None:
-            return DeprecationWarning
+            return da
         if (self.state_status == self.errors_dic['ob_center'] or self.state_status == self.errors_dic['ob_right'] 
                                                               or self.state_status == self.errors_dic['ob_left']):
             self.stop_car()
             return da
         self.car.turn(self.CENTER)
         if abs(self.yaw) > angle_error:
-            da = angle_error - self.yaw  
+            da = (self.yaw - angle_error) - self.center_angle
         
-        self.car.turn(self.CENTER + da)   
+        self.car.turn(self.CENTER + P * da)   
         if backward:
             self.car.move_backward(velocity)
         else:
@@ -215,6 +216,10 @@ class us_mvmnt():
         i = 0
         self.stop_car()
         s = 1
+        for i in range(20):
+            if self.yaw == None:
+                self.get_telemetry()
+        self.center_angle = self.yaw
         while not rospy.is_shutdown():
             try:
                 self.dt = time() - tt
@@ -222,14 +227,14 @@ class us_mvmnt():
                 self.t += self.dt
                 self.get_telemetry()
                 self.state_computing()
-                err = self.straight_moving()
+                #err = self.straight_moving()
                 #self.car.move_backward(self.SPEED) 
                 #self.turn_on_angle(angle = s * 90)
                 #self.random_movement()
                 if i%2 == 0:
                     try:
                         rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] err:{:.2f}[deg]".format(
-                                    self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, self.err))
+                                    self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, err))
                     except Exception:
                         pass
 
@@ -239,7 +244,7 @@ class us_mvmnt():
                 i += 1
                 s *= -1
                 #self.loop_rate.sleep()
-            except KeyboardInterrupt:
+            except Exception:
                 break
 
         self.stop_car()
