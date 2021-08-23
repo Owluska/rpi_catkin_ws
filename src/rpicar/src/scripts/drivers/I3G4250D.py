@@ -219,8 +219,11 @@ class I3G4250D:
         self.temp = struct.unpack("<b", bs)[0]
 
 
-#gyro = I3G4250D()
-# gyro.read_degXYZ()
-# # print(gyro.x, gyro.y, gyro.z, gyro.dt)
 # gyro = I3G4250D()
-# gyro.read_Temp()
+# while(1):
+#     gyro.read_degXYZ()
+#     gyro.read_Temperature()
+#     print(gyro.x, gyro.y, gyro.z, gyro.temp)
+#     sleep(gyro.dt)
+
+

@@ -193,6 +193,7 @@ class car_movement_PCA9685():
 #         stop = False
 #         for i in range(1, 11):
 #             try:
+#                 print(10 * i)
 #                 car.move_forward(velocity = 10 * i)
 #                 time.sleep(1)
 #                 car.move_backward(velocity = 10 * i)

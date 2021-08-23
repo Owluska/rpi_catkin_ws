@@ -29,14 +29,14 @@ class imu_talker():
         #                              [145.3125],[35.3759765625],[8.349609375]], dtype = 'object')
         # self.imu = mpu9250()
         self.f = Accelerometer()
-        self.f.hp_filter_setup(self.f.hp_400Hz, self.f.hp_reference)
+        #self.f.hp_filter_setup(self.f.hp_400Hz, self.f.hp_reference)
         self.w = Gyroscope()
         self.m = Magnetometer()
         self.p = Barometer()
         self.imu_coefs = {}
         self.cf = open(cf_path, 'r')
         self.read_IMU_calibration()
-        print(self.imu_coefs)
+        #print(self.imu_coefs)
         
         # self.ax = 0.00
         # self.ay = 0.00
@@ -58,9 +58,10 @@ class imu_talker():
 
         self.acc_data = np.array([self.f.x, self.f.y, self.f.z])
         self.gyro_data = np.array([self.w.x, self.w.y, self.w.z]) 
-        self.t_step = self.w.dt + self.f.dt + self.m.dt + self.p.dt
-        
-        self.isMoving = False 
+        #self.t_step = self.w.dt + self.f.dt + self.m.dt + self.p.dt
+        self.t_step = .02
+        self.isMoving = False
+        self.isRotating = False 
         
         self.g = 9.84
         self.D2R = math.pi/180
@@ -75,11 +76,13 @@ class imu_talker():
         self.quat_data = np.array([[1.0, .0, .0, 0.0]])
         self.use_magnetometer = True
         
+        self.learning_gain = 0.001
         if self.use_magnetometer:  
-            self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data, mag = self.mag_data)
-
+            self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data, mag = self.mag_data,
+                                                q0 = self.quat_data, gain = self.learning_gain, frequency=1/self.t_step)
         else:
-            self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data)
+            self.filter = ahrs.filters.Madgwick(acc = self.acc_data, gyr = self.gyro_data, q0 = self.quat_data,
+                                                gain = self.learning_gain, frequency=1/self.t_step)
     
         
         self.publish = False
@@ -150,21 +153,23 @@ class imu_talker():
     
     def read_IMU_data(self):
         self.f.read_ms2XYZ()
-        sleep(self.f.dt)
+        #sleep(self.f.dt)
 
         self.w.read_degXYZ()
         self.w.read_Temperature()
-        sleep(self.w.dt)
+        #sleep(self.w.dt)
 
         self.m.read_gaussXYZ()
         self.m.read_Temperature()
-        sleep(self.m.dt)
+        #sleep(self.m.dt)
 
         self.p.read_Temperature()
-        sleep(self.p.dt)
+        #sleep(self.p.dt)
 
         self.av_temperature = self.w.temp + self.p.temp + self.m.temp
         self.av_temperature /= 3
+
+        sleep(self.t_step)
 
     def read_IMU_calibrated_data(self):
         self.read_IMU_data()
@@ -179,7 +184,7 @@ class imu_talker():
         self.w.x, self.w.y, self.w.z = [d - coefs[k] for d, k in zip(data_array[:3], keys[:3])]
         self.f.x, self.f.y, self.f.z = [d * coefs[ks] -  coefs[koff] 
                                         for d, ks, koff in zip(data_array[3:6], keys[3:6], keys[6:9])]
-        self.f.z += self.f.GRAVITY_EARTH        
+        # self.f.z += self.f.GRAVITY_EARTH        
         self.m.x, self.m.y, self.m.z = [d * coefs[ks] -  coefs[koff] 
                                         for d, ks, koff in zip(data_array[6:], keys[9:12], keys[12:])]
         #print(self.w.x, self.w.y, self.w.z, self.f.x, self.f.y, self.f.z, self.m.x, self.m.y, self.m.z)
@@ -189,9 +194,9 @@ class imu_talker():
         # self.ay *= self.g
         # self.az *= self.g
 
-        # self.gx *= self.D2R
-        # self.gy *= self.D2R
-        # self.gz *= self.D2R
+        self.w.x *= self.D2R
+        self.w.y *= self.D2R
+        self.w.z *= self.D2R
         #print(self.f.x, self.f.y, self.f.z)
         acc_data = np.array([[self.f.x, self.f.y, self.f.z]])
         self.acc_data = np.append(self.acc_data, acc_data, axis = 0)
@@ -243,6 +248,8 @@ class imu_talker():
         self.pub_temp.publish(self.temp_msg)
 
     def get_orientation(self):
+        self.isRotating = rospy.get_param("rotating_state", default = False)
+        self.filter.Dt = self.dt
         if self.use_magnetometer:
             quat_data = self.filter.updateMARG(self.quat_data[-1], gyr = self.gyro_data[-1], acc = self.acc_data[-1], mag = self.mag_data[-1])
       
@@ -276,7 +283,7 @@ class imu_talker():
         tt = time()
         self.print = True
         # print once in a second
-        n =  int(1 /(self.t_step))
+        n =  int(1/(self.t_step))
         #print(n, self.t_step)
         while not rospy.is_shutdown():
             self.dt = time() - tt
@@ -295,8 +302,9 @@ class imu_talker():
             #rospy.set_param("position", self.position)
             
             if self.seq % n == 0 and self.print:
-                data = self.orientation
-                template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, *data.values())#*data.values())   
+                template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, *self.orientation.values())
+                #template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, self.w.x, self.w.y, self.w.z)
+                #template = "{:.2f}s {:.2f} {:.2f} {:.2f}".format(self.t, self.f.x, self.f.y, self.f.z)
                 print(template)
 
             #sleep(self.t_step)
