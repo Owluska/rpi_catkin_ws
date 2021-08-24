@@ -10,18 +10,30 @@ from rpicar.msg import telemetry
 # from message_filters import TimeSynchronizer, Subscriber
 from time import sleep, time
 
-# class PID:
-#     def __init__(self):
-#         self.I = 0.0
-#         self.P = 0.0
-#         self.D = 0.0
+class PID:
+    def __init__(self, Kp, Ki, Kd):
+        self.Ki = Ki
+        self.Kp = Kp
+        self.Kd = Kd
 
-#         self.summ_err = 0.0
-#         self.diff_err = 0.0
-#         self.dt = 0.0
+        self.e = 0.0
+        self.out = 0.0
+    
+    def compute_error(self, set_point, measured_variable):
+        self.e = set_point - measured_variable
+    
+    def compute_out(self, set_point, measured_variable, dt):
+        self.compute_error(set_point, measured_variable)
+        P = self.Kp * self.e 
+        I += self.Ki * self.e * dt
+        D = self.Kd * (self.e - self.out)/dt
+        self.out = self.e
+
+
 class us_mvmnt():
+    #this will be common for all instances of US_MVMNT
     min_voltage = 6.5
-    min_range = 0.1
+    min_range = 0.1   
     def __init__(self, US1_topic, US2_topic):
         #self.pca = PCA9685(0x41)
         self.car = car_movement_PCA9685(PCA9685(0x41))
@@ -32,17 +44,12 @@ class us_mvmnt():
 
         self.MAX_SPEED = 100
         self.SPEED = int(self.MAX_SPEED * 0.6)
-
-
-        # self.telem_msg = telemetry()
-        # self.telem_sub = rospy.Subscriber("telemetry_chatter", telemetry, self.callback)
-                
+           
         
         self.battery_voltage = 0.0
         self.range_value1 = None
         self.range_value2 = None
         
-        # self.min_range = 0.02
 
         self.px = None
         self.py = None
@@ -63,27 +70,29 @@ class us_mvmnt():
         # self.dt = rospy.get_time()
 
         self.errors_dic = {"ob_left": 1, "ob_right":2, "ob_center":3, "undervoltage":4, "none":0}
+        
         self.state_status = 0
         self.center_angle = 0.0
         self.rul_position = self.CENTER
         #self.car_init()
     
-
+    def stop(self):
+        self.car.stop_all()
+        rospy.set_param("moving_state", False)
+        self.car.turn(self.CENTER)
+        rospy.set_param("rotating_state", False)
     
-    # def callback(self, msg):       
-    #     self.range_value1 = msg.US1.range
-    #     self.range_value2 = msg.US2.range
+    def move(self, velocity, forward = True):
+        if forward:
+            self.car.move_forward(velocity)
+        else:
+            self.car.move_backward(velocity)
+        rospy.set_param("moving_state", True)
 
-    #     self.vo_px = msg.VO.pose.pose.position.x
-    #     self.vo_py = msg.VO.pose.pose.position.y
-    #     self.vo_pz = msg.VO.pose.pose.position.z
-
-    #     self.vo_qx = msg.VO.pose.pose.orientation.x
-    #     self.vo_qy = msg.VO.pose.pose.orientation.y
-    #     self.vo_qz = msg.VO.pose.pose.orientation.z
-    #     self.vo_qw = msg.VO.pose.pose.orientation.w
-    #     # self.vo_pose = msg.VO.pose.pose.position
-    #     # self.vo_quat = msg.VO.pose.pose.orientation
+    def turn(self, angle):
+        self.rul_position = self.car.turn(angle)
+        if angle != self.CENTER:
+              rospy.set_param("rotating_state", True)  
 
     def get_telemetry(self):
         try:
@@ -94,10 +103,6 @@ class us_mvmnt():
             self.roll = rospy.get_param('orientation')['roll']
             self.pitch = rospy.get_param('orientation')['pitch']
             self.yaw = rospy.get_param('orientation')['yaw']
-
-            # self.px = rospy.get_param('position')['x']
-            # self.py = rospy.get_param('position')['y']
-            # self.pz = rospy.get_param('position')['z']
         
         except Exception as e:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
@@ -142,24 +147,15 @@ class us_mvmnt():
         target_angle = angle - sign * self.yaw
         if abs(target_angle) > 180:
             target_angle -= sign * 180 
-        rospy.loginfo("Start: yaw:{:.2f}[deg] target:{:.2f}[deg], get: {:.2f}".format(self.yaw, target_angle, angle)) 
         
-        while(not rospy.is_shutdown()):
-            try:         
-                self.get_telemetry() 
-                if sign > 0 and self.yaw > target_angle:
-                    return 
-                elif sign < 0 and self.yaw < target_angle:
-                    return
-                elif self.state_status == self.errors_dic['none']:
-                    return
-                self.car.move_forward(self.SPEED)
-                rospy.loginfo("t:{:.2f}[s] yaw:{:.2f}[deg] target:{:.2f}[deg]".format(self.t, self.yaw, target_angle))
-            
-            except Exception:
-                break
-        
-    
+        if sign > 0 and self.yaw > target_angle:
+            return 
+        elif sign < 0 and self.yaw < target_angle:
+            return
+        elif self.state_status == self.errors_dic['none']:
+            return
+        self.car.move_forward(self.SPEED)
+                
     
     def backward_moving_n_correction(self, velocity = 60, backward = True, angle_error = 1, P = 2.0):
         da = 0
@@ -178,8 +174,8 @@ class us_mvmnt():
         if abs(self.rul_position - new_angle) < angle_error:
             return da
         
-        self.rul_position = self.car.turn(new_angle)
-        self.car.move_backward(velocity)
+        self.turn(new_angle)
+        self.move(velocity, forward = False)
         # if da != 0:
         #     #servo vel ~ 4ms/deg
         #     t = int(abs(P * da * 4))
@@ -198,9 +194,7 @@ class us_mvmnt():
         rospy.set_param("rotating_state", False)
         
         if self.state_status == self.errors_dic['undervoltage']:
-            self.car.stop_all()
-            self.car.turn(self.CENTER)
-            rospy.set_param("moving_state", False)  
+            self.stop()
             rospy.loginfo(self.state_status + ", so ending node..")
             rospy.on_shutdown(self.state_status)
             return -1
@@ -224,16 +218,12 @@ class us_mvmnt():
                 self.car.move_backward(self.SPEED) 
                         
     
-    def stop_car(self):
-        self.car.stop_all()
-        rospy.set_param("moving_state", False)
-        self.car.turn(self.CENTER)
-        rospy.set_param("rotating_state", False)
+ 
     
     def loop(self):
         tt = time()
         i = 0
-        self.stop_car()
+        self.stop()
         s = 1
         for i in range(20):
             if self.yaw == None:
@@ -244,8 +234,6 @@ class us_mvmnt():
             return
         self.center_angle = self.yaw
         print_if = int(1/self.dt)
-        # self.car.turn(self.CENTER)
-        # sleep(5.0)
         while not rospy.is_shutdown():
             try:
                 self.dt = time() - tt
@@ -253,8 +241,7 @@ class us_mvmnt():
                 self.t += self.dt
                 self.get_telemetry()
                 self.state_computing()
-                #err = self.backward_moving_n_correction()
-                #self.car.move_backward(self.SPEED) 
+                err = self.backward_moving_n_correction()
                 #self.turn_on_angle(angle = s * 90)
                 #self.random_movement()
                 if i % print_if == 0:
@@ -263,19 +250,13 @@ class us_mvmnt():
                                     self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, err, self.rul_position))
                     except Exception:
                         pass
-
-                # self.dt = rospy.get_time()
-                #self.car.stop_all()
-                #sleep(5)
                 i += 1
-                # s *= -1
-                #self.loop_rate.sleep()
             except Exception as e:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(e).__name__, e.args)
                     rospy.loginfo(message)
 
-        self.stop_car()
+        self.stop()
             
         
 def main():
