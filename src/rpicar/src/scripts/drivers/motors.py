@@ -171,8 +171,12 @@ class car_movement_PCA9685():
  
     def turn(self, degree):
         #print(degree)
-        if degree < self.MIN_DEGREE or degree > self.MAX_DEGREE:
-            degree = self.CENTER_DEGREE
+        degree = int(round(degree))
+        if degree < self.MIN_DEGREE:
+            degree = self.MIN_DEGREE
+        if degree > self.MAX_DEGREE:
+            degree = self.MAX_DEGREE
+        
         MIN_WIDTH = 0.02 * self.MAX_SPEED
         MAX_WIDTH = 0.12 * self.MAX_SPEED
 
@@ -181,6 +185,7 @@ class car_movement_PCA9685():
   
         # print("ON:{}".format(duty_cycle))
         self.pwm.set_pwm(self.RUL, 0, duty_cycle)
+        return degree
 
 
 

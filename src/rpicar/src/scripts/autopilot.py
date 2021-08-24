@@ -65,6 +65,7 @@ class us_mvmnt():
         self.errors_dic = {"ob_left": 1, "ob_right":2, "ob_center":3, "undervoltage":4, "none":0}
         self.state_status = 0
         self.center_angle = 0.0
+        self.rul_position = self.CENTER
         #self.car_init()
     
 
@@ -160,7 +161,7 @@ class us_mvmnt():
         
     
     
-    def backward_moving_n_correction(self, velocity = 50, backward = True, angle_error = 2, P = 1.0):
+    def backward_moving_n_correction(self, velocity = 60, backward = True, angle_error = 1, P = 2.0):
         da = 0
         if self.yaw == None:
             return da
@@ -168,13 +169,26 @@ class us_mvmnt():
                                                               or self.state_status == self.errors_dic['ob_left']):
             self.stop_car()
             return da
-        self.car.turn(self.CENTER)
+
         if abs(self.yaw) > angle_error:
             da = ((self.yaw  - self.center_angle) - angle_error)  
         
-        self.car.turn(self.CENTER + P * da)   
+        new_angle = self.CENTER + P * da
+        
+        if abs(self.rul_position - new_angle) < angle_error:
+            return da
+        
+        self.rul_position = self.car.turn(new_angle)
         self.car.move_backward(velocity)
-        self.rate.sleep()
+        # if da != 0:
+        #     #servo vel ~ 4ms/deg
+        #     t = int(abs(P * da * 4))
+        #     for i in range(int(t)):
+        #         try:
+        #             sleep(.001)
+        #         except Exception:
+        #             break
+        #self.rate.sleep()
         return da              
             
 
@@ -245,8 +259,8 @@ class us_mvmnt():
                 #self.random_movement()
                 if i % print_if == 0:
                     try:
-                        rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] err:{:.2f}[deg]".format(
-                                    self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, err))
+                        rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] err:{:.2f}[deg] rul_pos:{:.2f}".format(
+                                    self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, err, self.rul_position))
                     except Exception:
                         pass
 
@@ -256,8 +270,10 @@ class us_mvmnt():
                 i += 1
                 # s *= -1
                 #self.loop_rate.sleep()
-            except Exception:
-                break
+            except Exception as e:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(e).__name__, e.args)
+                    rospy.loginfo(message)
 
         self.stop_car()
             
