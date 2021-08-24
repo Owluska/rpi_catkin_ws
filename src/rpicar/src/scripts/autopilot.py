@@ -8,8 +8,17 @@ from drivers.motors import PCA9685, car_movement_PCA9685
 from rpicar.msg import telemetry
 
 # from message_filters import TimeSynchronizer, Subscriber
-
 from time import sleep, time
+
+# class PID:
+#     def __init__(self):
+#         self.I = 0.0
+#         self.P = 0.0
+#         self.D = 0.0
+
+#         self.summ_err = 0.0
+#         self.diff_err = 0.0
+#         self.dt = 0.0
 class us_mvmnt():
     min_voltage = 6.5
     min_range = 0.1
@@ -27,9 +36,7 @@ class us_mvmnt():
 
         # self.telem_msg = telemetry()
         # self.telem_sub = rospy.Subscriber("telemetry_chatter", telemetry, self.callback)
-        
-        
-        self.loop_rate = rospy.Rate(0.1)
+                
         
         self.battery_voltage = 0.0
         self.range_value1 = None
@@ -45,15 +52,15 @@ class us_mvmnt():
         self.pitch = None
         self.yaw = None
         
-        self.dt = 0.00
+        self.dt = 0.01
         self.t = 0.00
         
         # self.point = [0, 0, 0]
         # self.quaternion = [0, 0, 0, 1]
 
-        self.loop_rate = rospy.Rate(0.75)
-        self.time_secs = 0
-        self.dt = rospy.get_time()
+        self.rate = rospy.Rate(0.01)
+        # self.time_secs = 0
+        # self.dt = rospy.get_time()
 
         self.errors_dic = {"ob_left": 1, "ob_right":2, "ob_center":3, "undervoltage":4, "none":0}
         self.state_status = 0
@@ -153,7 +160,7 @@ class us_mvmnt():
         
     
     
-    def straight_moving(self, velocity = 60, backward = True, angle_error = 5, P = 0.8):
+    def backward_moving_n_correction(self, velocity = 50, backward = True, angle_error = 2, P = 1.0):
         da = 0
         if self.yaw == None:
             return da
@@ -163,13 +170,11 @@ class us_mvmnt():
             return da
         self.car.turn(self.CENTER)
         if abs(self.yaw) > angle_error:
-            da = (self.yaw - angle_error) - self.center_angle
+            da = ((self.yaw  - self.center_angle) - angle_error)  
         
         self.car.turn(self.CENTER + P * da)   
-        if backward:
-            self.car.move_backward(velocity)
-        else:
-            self.car.move_forward(velocity)
+        self.car.move_backward(velocity)
+        self.rate.sleep()
         return da              
             
 
@@ -219,7 +224,14 @@ class us_mvmnt():
         for i in range(20):
             if self.yaw == None:
                 self.get_telemetry()
+            else: 
+                break
+        if self.yaw == None:
+            return
         self.center_angle = self.yaw
+        print_if = int(1/self.dt)
+        # self.car.turn(self.CENTER)
+        # sleep(5.0)
         while not rospy.is_shutdown():
             try:
                 self.dt = time() - tt
@@ -227,11 +239,11 @@ class us_mvmnt():
                 self.t += self.dt
                 self.get_telemetry()
                 self.state_computing()
-                #err = self.straight_moving()
+                #err = self.backward_moving_n_correction()
                 #self.car.move_backward(self.SPEED) 
                 #self.turn_on_angle(angle = s * 90)
                 #self.random_movement()
-                if i%2 == 0:
+                if i % print_if == 0:
                     try:
                         rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] err:{:.2f}[deg]".format(
                                     self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, err))
@@ -242,7 +254,7 @@ class us_mvmnt():
                 #self.car.stop_all()
                 #sleep(5)
                 i += 1
-                s *= -1
+                # s *= -1
                 #self.loop_rate.sleep()
             except Exception:
                 break

@@ -118,10 +118,11 @@ class car_movement_PCA9685():
     FREQUENCY = 50
     MAX_SPEED = 4095
     MIN_SPEED = 0
-
-    MAX_DEGREE = 140
-    MIN_DEGREE = 40
-    CENTER_DEGREE = 90
+    
+    CENTER_DEGREE = 100
+    MAX_DEGREE = CENTER_DEGREE + 50
+    MIN_DEGREE = CENTER_DEGREE - 50
+    
 
     A1 = 6
     B1 = 5
@@ -186,7 +187,7 @@ class car_movement_PCA9685():
 
 # pwm = PCA9685(0x41)
 # car = car_movement_PCA9685(pwm)
-# debug = "motors"
+# debug = "servos"
 
 # if debug == "motors":
 #     while True:
@@ -208,16 +209,18 @@ class car_movement_PCA9685():
 # elif debug == "servos":
 #     while True:
 #         stop = False
-#         for i in range(40, 141, 5):
+#         for i in range(95, 120, 1):
 #             try:
 #                 car.turn(degree = i)
-#                 time.sleep(1)
+#                 time.sleep(2)
+#                 print(i)
 #             except KeyboardInterrupt:
 #                 car.stop_all()
 #                 stop = True
 #                 break
 #         if stop:
 #             break
+#         time.sleep(5)
 
 
 
