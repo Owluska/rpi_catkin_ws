@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 import rospy
-
+import sys
 # from sensor_msgs.msg import Range, BatteryState
 # from nav_msgs.msg import Odometry
 # from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -17,6 +17,7 @@ class PID:
         self.Kd = Kd
 
         self.e = 0.0
+        self.I = 0.0
         self.out = 0.0
     
     def compute_error(self, set_point, measured_variable):
@@ -25,9 +26,9 @@ class PID:
     def compute_out(self, set_point, measured_variable, dt):
         self.compute_error(set_point, measured_variable)
         P = self.Kp * self.e 
-        I += self.Ki * self.e * dt
+        self.I += self.Ki * self.e * dt
         D = self.Kd * (self.e - self.out)/dt
-        self.out = self.e
+        self.out = P + D + self.I
 
 
 class us_mvmnt():
@@ -37,6 +38,7 @@ class us_mvmnt():
     def __init__(self, US1_topic, US2_topic):
         #self.pca = PCA9685(0x41)
         self.car = car_movement_PCA9685(PCA9685(0x41))
+
         
         self.CENTER = self.car.CENTER_DEGREE
         self.RIGHT = self.car.MIN_DEGREE
@@ -74,6 +76,8 @@ class us_mvmnt():
         self.state_status = 0
         self.center_angle = 0.0
         self.rul_position = self.CENTER
+
+
         #self.car_init()
     
     def stop(self):
@@ -241,7 +245,7 @@ class us_mvmnt():
                 self.t += self.dt
                 self.get_telemetry()
                 self.state_computing()
-                err = self.backward_moving_n_correction()
+                #err = self.backward_moving_n_correction()
                 #self.turn_on_angle(angle = s * 90)
                 #self.random_movement()
                 if i % print_if == 0:
@@ -258,16 +262,25 @@ class us_mvmnt():
 
         self.stop()
             
-        
+def my_hook():
+    rospy.loginfo("Stop signal was received")
+
 def main():
     #print('car_us_movement')
     rospy.init_node('car_us_movement', anonymous = True)
     
     US1 = str(rospy.get_param('~US1_topic', default="US1_data"))
     US2 = str(rospy.get_param('~US2_topic', default="US2_data"))
-    #print(US1, US2)
+    toStop = bool(rospy.get_param('~stop_car', default="False"))
+    print(toStop)
     m = us_mvmnt(US1, US2)
-    m.loop()
+    if toStop:
+        m.stop()
+        rospy.on_shutdown(my_hook)
+        sys.exit(0)
+        return
+    else:
+        m.loop()
 
 
 if __name__ == '__main__':
