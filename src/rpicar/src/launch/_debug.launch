@@ -7,6 +7,8 @@
   </node>
 
   <node pkg="rpicar" type="IMU_localization_talker.py" name="local_node"/>   
-  <node pkg="rpicar" type="autopilot.py" name="auto"/> 
+  <node pkg="rpicar" type="autopilot.py" name="auto">
+          <param name="stop_car" value="False"/>
+  </node>
 </launch>
 

@@ -161,13 +161,13 @@ class us_mvmnt():
         self.car.move_forward(self.SPEED)
                 
     
-    def backward_moving_n_correction(self, velocity = 60, backward = True, angle_error = 1, P = 2.0):
+    def backward_moving_with_angle_crrctn(self, velocity = 60, backward = True, angle_error = 1, P = 2.0):
         da = 0
         if self.yaw == None:
             return da
         if (self.state_status == self.errors_dic['ob_center'] or self.state_status == self.errors_dic['ob_right'] 
                                                               or self.state_status == self.errors_dic['ob_left']):
-            self.stop_car()
+            self.stop()
             return da
 
         if abs(self.yaw) > angle_error:
@@ -180,46 +180,37 @@ class us_mvmnt():
         
         self.turn(new_angle)
         self.move(velocity, forward = False)
-        # if da != 0:
-        #     #servo vel ~ 4ms/deg
-        #     t = int(abs(P * da * 4))
-        #     for i in range(int(t)):
-        #         try:
-        #             sleep(.001)
-        #         except Exception:
-        #             break
-        #self.rate.sleep()
         return da              
             
 
-    def random_movement(self):
-        rospy.set_param("moving_state", True)
-        angle = 90
-        rospy.set_param("rotating_state", False)
+    # def random_movement(self):
+    #     rospy.set_param("moving_state", True)
+    #     angle = 90
+    #     rospy.set_param("rotating_state", False)
         
-        if self.state_status == self.errors_dic['undervoltage']:
-            self.stop()
-            rospy.loginfo(self.state_status + ", so ending node..")
-            rospy.on_shutdown(self.state_status)
-            return -1
+    #     if self.state_status == self.errors_dic['undervoltage']:
+    #         self.stop()
+    #         rospy.loginfo(self.state_status + ", so ending node..")
+    #         rospy.on_shutdown(self.state_status)
+    #         return -1
         
         
-        elif self.state_status == self.errors_dic['ob_left']:
-                self.turn_on_angle(angle)
-                rospy.set_param("rotating_state", True)  
-                self.car.move_forward(self.MAX_SPEED)
+    #     elif self.state_status == self.errors_dic['ob_left']:
+    #             self.turn_on_angle(angle)
+    #             rospy.set_param("rotating_state", True)  
+    #             self.car.move_forward(self.MAX_SPEED)
         
-        elif self.state_status == self.errors_dic['ob_right']:
-                self.turn_on_angle(-angle)
-                rospy.set_param("rotating_state", True)  
-                self.car.move_forward(self.MAX_SPEED)
+    #     elif self.state_status == self.errors_dic['ob_right']:
+    #             self.turn_on_angle(-angle)
+    #             rospy.set_param("rotating_state", True)  
+    #             self.car.move_forward(self.MAX_SPEED)
         
-        elif self.state_status == self.errors_dic['ob_center']:
-                self.car.turn(self.CENTER)
-                self.car.move_forward(self.SPEED)
-        else:
-                self.car.turn(self.CENTER)
-                self.car.move_backward(self.SPEED) 
+    #     elif self.state_status == self.errors_dic['ob_center']:
+    #             self.car.turn(self.CENTER)
+    #             self.car.move_forward(self.SPEED)
+    #     else:
+    #             self.car.turn(self.CENTER)
+    #             self.car.move_backward(self.SPEED) 
                         
     
  
@@ -245,9 +236,8 @@ class us_mvmnt():
                 self.t += self.dt
                 self.get_telemetry()
                 self.state_computing()
-                #err = self.backward_moving_n_correction()
-                #self.turn_on_angle(angle = s * 90)
-                #self.random_movement()
+                err = self.backward_moving_with_angle_crrctn()
+
                 if i % print_if == 0:
                     try:
                         rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] err:{:.2f}[deg] rul_pos:{:.2f}".format(
@@ -272,7 +262,7 @@ def main():
     US1 = str(rospy.get_param('~US1_topic', default="US1_data"))
     US2 = str(rospy.get_param('~US2_topic', default="US2_data"))
     toStop = bool(rospy.get_param('~stop_car', default="False"))
-    print(toStop)
+
     m = us_mvmnt(US1, US2)
     if toStop:
         m.stop()
