@@ -135,33 +135,26 @@ class us_mvmnt():
         # data = str(self.errors_dic[key])
         # rospy.loginfo(data)
 
-    def turn_on_angle(self, angle = 90):
-        self.get_telemetry()
+    def turn_on_yaw_angle(self, angle = 90):
         if self.yaw == None or angle == 0:
             return
         
         if abs(angle) > 180:
             rospy.loginfo("Get wrong parameter value! Please, set angle in [-180, 180] range.") 
             return
-               
-        if angle < 0:
-            sign = -1
-            self.car.turn(self.RIGHT)       
-        else:
-            sign = 1
-            self.car.turn(self.LEFT)
+ 
+        self.turn(self.center_angle + angle)              
         
-        target_angle = angle - sign * self.yaw
+        target_angle = angle - abs(self.yaw)/self.yaw * self.yaw
         if abs(target_angle) > 180:
             target_angle -= sign * 180 
         
-        if sign > 0 and self.yaw > target_angle:
-            return 
-        elif sign < 0 and self.yaw < target_angle:
-            return
-        elif self.state_status == self.errors_dic['none']:
-            return
-        self.car.move_forward(self.SPEED)
+        if abs(self.yaw) > abs(target_angle) or self.state_status != self.errors_dic['none']:
+            self.stop()
+            return target_angle
+ 
+        self.move(velocity = self.MAX_SPEED, forward = False)
+        return target_angle
                 
     
     def backward_moving_with_angle_crrctn(self, velocity = 60, angle_error = 1, P = 2.0):
@@ -237,15 +230,15 @@ class us_mvmnt():
                 self.get_telemetry()
                 self.state_computing()
                 # err = self.backward_moving_with_angle_crrctn()
-                err = self.forward_moving_with_angle_crrctn(t0, t_stop = t_stop)
-                              
-                if(not bool(rospy.get_param("moving_state", False))):
-                    sleep(5)
-                    t0 = self.t
+                # err = self.forward_moving_with_angle_crrctn(t0, t_stop = t_stop)
+                ta = self.turn_on_yaw_angle(90)           
+                # if(not bool(rospy.get_param("moving_state", False))):
+                #     sleep(5)
+                #     t0 = self.t
                 if i % print_if == 0:
                     try:
-                        rospy.loginfo("t:{:.2f}[s] t0{:.2f} st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] rul_pos:{:.2f}".format(
-                                    self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, self.rul_position, t0))
+                        rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] rul_pos:{:.2f} ta{:.2f}".format(
+                                    self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, self.rul_position, ta))
                     except Exception:
                         pass
                 i += 1
