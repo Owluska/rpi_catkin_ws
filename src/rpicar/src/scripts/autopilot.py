@@ -77,6 +77,9 @@ class us_mvmnt():
         self.center_angle = 0.0
         self.rul_position = self.CENTER
 
+        self.moving = False
+        self.rotating = False
+
 
         #self.car_init()
     
@@ -161,7 +164,7 @@ class us_mvmnt():
         self.car.move_forward(self.SPEED)
                 
     
-    def backward_moving_with_angle_crrctn(self, velocity = 60, backward = True, angle_error = 1, P = 2.0):
+    def backward_moving_with_angle_crrctn(self, velocity = 60, angle_error = 1, P = 2.0):
         da = 0
         if self.yaw == None:
             return da
@@ -182,45 +185,39 @@ class us_mvmnt():
         self.move(velocity, forward = False)
         return da              
             
+    def forward_moving_with_angle_crrctn(self, t_start, t_stop = 5, velocity = 60, angle_error = 1, P = 2.0):
+        da = 0
+        if self.yaw == None:
+            return da
+        if self.t - t_start >= t_stop:
+            self.stop()
+            return da
+        
+        if abs(self.yaw) > angle_error:
+            da = ((self.yaw  - self.center_angle) - angle_error)  
+        
+        new_angle = self.CENTER - P * da
+        
+        if abs(self.rul_position - new_angle) < angle_error:
+            return da
+        
+        self.turn(new_angle)
+        self.move(velocity, forward = True)
+        return da  
 
-    # def random_movement(self):
-    #     rospy.set_param("moving_state", True)
-    #     angle = 90
-    #     rospy.set_param("rotating_state", False)
-        
-    #     if self.state_status == self.errors_dic['undervoltage']:
-    #         self.stop()
-    #         rospy.loginfo(self.state_status + ", so ending node..")
-    #         rospy.on_shutdown(self.state_status)
-    #         return -1
-        
-        
-    #     elif self.state_status == self.errors_dic['ob_left']:
-    #             self.turn_on_angle(angle)
-    #             rospy.set_param("rotating_state", True)  
-    #             self.car.move_forward(self.MAX_SPEED)
-        
-    #     elif self.state_status == self.errors_dic['ob_right']:
-    #             self.turn_on_angle(-angle)
-    #             rospy.set_param("rotating_state", True)  
-    #             self.car.move_forward(self.MAX_SPEED)
-        
-    #     elif self.state_status == self.errors_dic['ob_center']:
-    #             self.car.turn(self.CENTER)
-    #             self.car.move_forward(self.SPEED)
-    #     else:
-    #             self.car.turn(self.CENTER)
-    #             self.car.move_backward(self.SPEED) 
-                        
     
- 
+    def counter(self, t0, secs):
+        if self.t - t0 >= secs:
+            return True
+        else:
+            return False
     
     def loop(self):
         tt = time()
         i = 0
         self.stop()
         s = 1
-        for i in range(20):
+        for i in range(5):
             if self.yaw == None:
                 self.get_telemetry()
             else: 
@@ -229,6 +226,9 @@ class us_mvmnt():
             return
         self.center_angle = self.yaw
         print_if = int(1/self.dt)
+
+        t0 = self.t
+        t_stop = 15
         while not rospy.is_shutdown():
             try:
                 self.dt = time() - tt
@@ -236,12 +236,16 @@ class us_mvmnt():
                 self.t += self.dt
                 self.get_telemetry()
                 self.state_computing()
-                err = self.backward_moving_with_angle_crrctn()
-
+                # err = self.backward_moving_with_angle_crrctn()
+                err = self.forward_moving_with_angle_crrctn(t0, t_stop = t_stop)
+                              
+                if(not bool(rospy.get_param("moving_state", False))):
+                    sleep(5)
+                    t0 = self.t
                 if i % print_if == 0:
                     try:
-                        rospy.loginfo("t:{:.2f}[s] st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] err:{:.2f}[deg] rul_pos:{:.2f}".format(
-                                    self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, err, self.rul_position))
+                        rospy.loginfo("t:{:.2f}[s] t0{:.2f} st:{:d} ob1:{:.2f}[m] ob2:{:.2f}[m] yaw:{:.2f}[deg] rul_pos:{:.2f}".format(
+                                    self.t, self.state_status, self.range_value1, self.range_value2, self.yaw, self.rul_position, t0))
                     except Exception:
                         pass
                 i += 1

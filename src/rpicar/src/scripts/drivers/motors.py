@@ -119,7 +119,7 @@ class car_movement_PCA9685():
     MAX_SPEED = 4095
     MIN_SPEED = 0
     
-    CENTER_DEGREE = 100
+    CENTER_DEGREE = 110
     MAX_DEGREE = CENTER_DEGREE + 50
     MIN_DEGREE = CENTER_DEGREE - 50
     
@@ -214,10 +214,10 @@ class car_movement_PCA9685():
 # elif debug == "servos":
 #     while True:
 #         stop = False
-#         for i in range(95, 120, 1):
+#         for i in range(111, 111, 1):
 #             try:
 #                 car.turn(degree = i)
-#                 time.sleep(2)
+#                 time.sleep(1)
 #                 print(i)
 #             except KeyboardInterrupt:
 #                 car.stop_all()
