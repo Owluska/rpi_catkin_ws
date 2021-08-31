@@ -1,1 +1,0 @@
-svn info /home/pi/catkin_ws/src/bfl-release | grep '^Revision' | sed -e 's/Revision: *//'

@@ -8,7 +8,7 @@ from ina219 import INA219
 from time import time, sleep
 from datetime import datetime
 from drivers.multiplexer import PCA9547
-from rpicar.msg import telemetry
+# from rpicar.msg import telemetry
 
 class battery_state_proc():
     def __init__(self, adress = 0x41):

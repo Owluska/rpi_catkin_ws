@@ -4,7 +4,7 @@ import rospy
 import sys
 from sensor_msgs.msg import Range
 
-from rpicar.msg import telemetry
+# from rpicar.msg import telemetry
 from drivers.US_lib import US
 
 

@@ -1,0 +1,10 @@
+file(REMOVE_RECURSE
+  "/home/pi/catkin_ws/devel/include/rpicar/camera.h"
+  "/home/pi/catkin_ws/devel/include/rpicar/telemetry.h"
+  "CMakeFiles/rpicar_generate_messages_cpp"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang )
+  include(CMakeFiles/rpicar_generate_messages_cpp.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

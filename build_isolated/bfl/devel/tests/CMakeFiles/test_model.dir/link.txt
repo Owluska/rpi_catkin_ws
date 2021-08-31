@@ -1,1 +1,0 @@
-/usr/bin/c++  -g  -rdynamic CMakeFiles/test_model.dir/test-runner.o CMakeFiles/test_model.dir/approxEqual.o CMakeFiles/test_model.dir/model_test.o  -o test_model   -L/home/pi/catkin_ws/build_isolated/bfl/devel/src  -Wl,-rpath,/home/pi/catkin_ws/build_isolated/bfl/devel/src ../src/liborocos-bfl.so -lcppunit 
